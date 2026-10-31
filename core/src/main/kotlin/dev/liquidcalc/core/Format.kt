@@ -13,7 +13,8 @@ object Format {
     /**
      * Texto para mostrar: hasta [digits] cifras significativas, sin ceros de más y con
      * [decimalSeparator]. Los números muy grandes o muy chicos van en notación científica
-     * ("1.5e20", "2e-9"); el resto, con todas sus cifras ("123456789", "0.000012").
+     * ("1.5×10^20", "2×10^-9"), que el motor vuelve a entender si se reutiliza; el resto, con
+     * todas sus cifras ("123456789", "0.000012").
      */
     fun display(value: BigDecimal, decimalSeparator: Char = '.', digits: Int = DISPLAY_DIGITS): String {
         val r = value.round(MathContext(digits, RoundingMode.HALF_EVEN)).normalized()
@@ -22,7 +23,7 @@ object Format {
         val text = if (exponent in -6 until digits) {
             r.toPlainString()
         } else {
-            r.movePointLeft(exponent).normalized().toPlainString() + "e" + exponent
+            r.movePointLeft(exponent).normalized().toPlainString() + "×10^" + exponent
         }
         return if (decimalSeparator == '.') text else text.replace('.', decimalSeparator)
     }

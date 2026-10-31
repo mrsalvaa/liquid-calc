@@ -43,11 +43,11 @@ class CalculatorTest {
     }
 
     @Test fun bigAndSmallNumbers() {
-        assertEquals("1.26765060022823e30", show("2^100"))
-        assertEquals("1e-7", show("0.0000001"))
+        assertEquals("1.26765060022823×10^30", show("2^100"))
+        assertEquals("1×10^-7", show("0.0000001"))
         assertEquals("0.000001", show("0.000001"))
         assertEquals("123456789012345", show("123456789012345"))
-        assertEquals("1.23456789012346e15", show("1234567890123456"))
+        assertEquals("1.23456789012346×10^15", show("1234567890123456"))
     }
 
     // --- Precedencia y anidamiento ------------------------------------------------------------
@@ -181,7 +181,7 @@ class CalculatorTest {
         assertEquals("1", show("0!"))
         assertEquals("120", show("5!"))
         assertEquals("3628800", show("10!"))
-        assertEquals("9.33262154439442e157", show("100!"))
+        assertEquals("9.33262154439442×10^157", show("100!"))
         assertEquals("720", show("3!!"))
     }
 
@@ -264,9 +264,17 @@ class CalculatorTest {
         assertEquals("1", show("SIN(90)"))
     }
 
+    @Test fun scientificDisplayCanBeReused() {
+        val big = (Calculator.evaluate("2^100") as CalcResult.Value).value
+        val shown = Format.display(big)
+        assertEquals("1.26765060022823×10^30", shown)
+        assertEquals("1.26765060022823×10^30", show(shown))
+        assertEquals("1×10^-7", show(Format.display(BigDecimal("1E-7"))))
+    }
+
     @Test fun displayFormat() {
         assertEquals("0,3", Format.display(BigDecimal("0.3"), ','))
-        assertEquals("1,5e20", Format.display(BigDecimal("1.5E+20"), ','))
+        assertEquals("1,5×10^20", Format.display(BigDecimal("1.5E+20"), ','))
         assertEquals("100", Format.display(BigDecimal("1E+2")))
         assertEquals("0", Format.display(BigDecimal("0E-34")))
         assertEquals("-2.5", Format.display(BigDecimal("-2.50")))

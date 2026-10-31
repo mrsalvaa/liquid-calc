@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="app_name">Calculadora</string>
+    <string name="key_plus">más</string>
+    <string name="key_minus">menos</string>
+    <string name="key_times">por</string>
+    <string name="key_divide">dividido</string>
+    <string name="key_power">elevado a</string>
+    <string name="key_percent">por ciento</string>
+    <string name="key_factorial">factorial</string>
+    <string name="key_decimal">coma decimal</string>
+    <string name="key_equals">igual</string>
+    <string name="key_clear">borrar todo</string>
+    <string name="key_backspace">borrar</string>
+    <string name="key_parens">paréntesis</string>
+    <string name="key_open">abrir paréntesis</string>
+    <string name="key_close">cerrar paréntesis</string>
+    <string name="key_sin">seno</string>
+    <string name="key_cos">coseno</string>
+    <string name="key_tan">tangente</string>
+    <string name="key_asin">arcoseno</string>
+    <string name="key_acos">arcocoseno</string>
+    <string name="key_atan">arcotangente</string>
+    <string name="key_ln">logaritmo natural</string>
+    <string name="key_log">logaritmo en base 10</string>
+    <string name="key_sqrt">raíz cuadrada</string>
+    <string name="key_cbrt">raíz cúbica</string>
+    <string name="key_square">al cuadrado</string>
+    <string name="key_exp">e elevado a</string>
+    <string name="key_abs">valor absoluto</string>
+    <string name="key_inverse">inverso</string>
+    <string name="key_pi">pi</string>
+    <string name="key_e">número e</string>
+    <string name="key_ans">resultado anterior</string>
+    <string name="key_mc">borrar memoria</string>
+    <string name="key_mr">recuperar memoria</string>
+    <string name="key_m_plus">sumar a la memoria</string>
+    <string name="key_m_minus">restar de la memoria</string>
+    <string name="memory_value">Memoria: %s</string>
+    <string name="nothing_to_save">Todavía no hay un resultado</string>
+    <string name="degrees">Grados</string>
+    <string name="radians">Radianes</string>
+    <string name="deg">DEG</string>
+    <string name="rad">RAD</string>
+    <string name="angle_unit">Ángulos</string>
+    <string name="angle_toggle">Unidad de ángulo: %s. Tocá para cambiarla.</string>
+    <string name="scientific">Teclas científicas</string>
+    <string name="history">Historial</string>
+    <string name="history_empty">Todavía no hay cuentas</string>
+    <string name="history_empty_hint">Los resultados que obtengas con = aparecen acá. Tocá uno para volver a usarlo.</string>
+    <string name="history_off">El historial está desactivado</string>
+    <string name="history_off_hint">Activalo en Ajustes para guardar tus cuentas en este celu.</string>
+    <string name="clear_history">Borrar historial</string>
+    <string name="clear_history_confirm">¿Borrar todas las cuentas guardadas? No se puede deshacer.</string>
+    <string name="delete">Borrar</string>
+    <string name="history_cleared">Historial borrado</string>
+    <string name="save_history">Guardar historial</string>
+    <string name="save_history_hint">Las cuentas quedan solo en este celu. Al desactivarlo se borra lo guardado.</string>
+    <string name="close">Cerrar</string>
+    <string name="copy">Copiar resultado</string>
+    <string name="copied">Copiado</string>
+    <string name="settings">Ajustes</string>
+    <string name="calculator_section">Calculadora</string>
+    <string name="appearance">Apariencia</string>
+    <string name="keyboard">Teclado físico</string>
+    <string name="keyboard_hint">Los números y + − * / ^ % ! ( ) se escriben como siempre. Enter o = calcula, Retroceso borra y Esc limpia todo. Letras: s sin, c cos, t tan, l ln, g log, r √, p π, e, a ANS. Ctrl+C copia, Ctrl+V pega, Ctrl+H abre el historial y Ctrl+D cambia entre grados y radianes.</string>
+    <string name="about">Acerca de</string>
+    <string name="about_text">Liquid Calc %1$s. Sin acceso a internet, anuncios ni telemetría: todo queda en este celu. Software libre bajo GPL-3.0-or-later.</string>
+    <string name="error_syntax">La expresión está incompleta</string>
+    <string name="error_division">No se puede dividir por cero</string>
+    <string name="error_domain">Fuera del dominio de la función</string>
+    <string name="error_overflow">El resultado es demasiado grande</string>
+    <string name="result_cd">Resultado: %s</string>
+    <string name="expression_cd">Expresión: %s</string>
+</resources>
