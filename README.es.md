@@ -49,11 +49,11 @@ Bajá el APK desde [Releases](../../releases) e instalalo (Android 12 o posterio
 Comprobá que el archivo no fue alterado:
 
 ```bash
-sha256sum -c liquid-calc-v0.3.0.apk.sha256
+sha256sum -c liquid-calc-v0.3.1.apk.sha256
 ```
 
 ```
-4fffb67f77744ab4546562ffafe9bf7f0c45b2faeca8e97c63115fd57b82923e  liquid-calc-v0.3.0.apk
+d3e4febbc4cc5671ddc971847f7563da46d95a63e3c676846d2432cab0f3c69c  liquid-calc-v0.3.1.apk
 ```
 
 Y que está firmado con la clave del proyecto (huella SHA-256 del certificado):
@@ -63,7 +63,7 @@ Y que está firmado con la clave del proyecto (huella SHA-256 del certificado):
 ```
 
 ```bash
-apksigner verify --print-certs liquid-calc-v0.3.0.apk
+apksigner verify --print-certs liquid-calc-v0.3.1.apk
 ```
 
 ## Compilar
