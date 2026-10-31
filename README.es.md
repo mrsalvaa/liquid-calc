@@ -52,7 +52,7 @@ sha256sum -c liquid-calc-v0.2.1.apk.sha256
 ```
 
 ```
-SHA256_PENDIENTE  liquid-calc-v0.2.1.apk
+341fbf87fa031b1cd73355e7c80e3429236e63830284652a4e93acdb4ea90014  liquid-calc-v0.2.1.apk
 ```
 
 Y que está firmado con la clave del proyecto (huella SHA-256 del certificado):
