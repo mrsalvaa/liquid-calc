@@ -2,8 +2,8 @@
 package dev.liquidcalc
 
 import dev.liquidcalc.data.AppSettings
-import dev.liquidui.settings.LiquidDefaults
-import dev.liquidui.settings.LiquidJson
+import dev.liquidcalc.ui.glass.LiquidDefaults
+import dev.liquidcalc.ui.glass.LiquidJson
 import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals

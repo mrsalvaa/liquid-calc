@@ -2,7 +2,7 @@
 package dev.liquidcalc.data
 
 import android.content.Context
-import dev.liquidui.settings.JsonStore
+import dev.liquidcalc.ui.glass.JsonStore
 import kotlinx.serialization.builtins.ListSerializer
 import java.io.File
 

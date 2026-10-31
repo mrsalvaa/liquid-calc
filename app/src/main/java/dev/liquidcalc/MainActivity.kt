@@ -14,8 +14,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.liquidcalc.data.Stores
 import dev.liquidcalc.ui.CalcScreen
 import dev.liquidcalc.util.preferHighestRefreshRate
-import dev.liquidui.theme.GlassTheme
-import dev.liquidui.theme.isDarkTheme
+import dev.liquidcalc.ui.glass.GlassTheme
+import dev.liquidcalc.ui.glass.isDarkTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

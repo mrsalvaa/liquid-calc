@@ -28,10 +28,10 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.liquidui.components.GlassSurface
-import dev.liquidui.icons.styled
-import dev.liquidui.theme.LocalGlass
-import dev.liquidui.theme.accentFill
+import dev.liquidcalc.ui.glass.GlassSurface
+import dev.liquidcalc.ui.glass.styled
+import dev.liquidcalc.ui.glass.LocalGlass
+import dev.liquidcalc.ui.glass.accentFill
 
 /** Cómo se ve una tecla: números, operadores, funciones, "=" o borrar. */
 enum class KeyKind { DIGIT, OPERATOR, FUNCTION, EQUALS, CLEAR }

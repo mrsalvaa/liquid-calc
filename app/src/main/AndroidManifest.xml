@@ -48,7 +48,7 @@
             tools:ignore="MissingClass"
             tools:node="remove" />
 
-        <!-- Un alias por ícono de la app: solo uno está activo (ver AppIcons de liquid-ui). -->
+        <!-- Un alias por ícono de la app: solo uno está activo (ver ui/glass/AppIcons.kt). -->
         <activity-alias
             android:name=".IconLiquid"
             android:enabled="true"

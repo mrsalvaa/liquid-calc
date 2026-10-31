@@ -10,7 +10,6 @@ A free calculator for Android with the same liquid-glass interface as
 [Liquid Calendar](https://github.com/mrsalvaa/liquid-calendar),
 [Liquid Clock](https://github.com/mrsalvaa/liquid-clock) and
 [Liquid Gallery](https://github.com/mrsalvaa/liquid-gallery), plus the same plainer Solid style.
-It's the first app of the suite built on [liquid-ui](liquid-ui/README.md), the shared components.
 
 ## Privacy
 
@@ -41,12 +40,36 @@ history can be cleared or turned off in Settings.
 - Accessibility: every key has a TalkBack name ("divided by", "sine"), the result is announced,
   keys are at least 48 dp and text follows the theme's contrast.
 
+## Download and install
+
+Get the APK from [Releases](../../releases) and install it (Android 12 or later).
+
+Check that the file hasn't been tampered with:
+
+```bash
+sha256sum -c liquid-calc-v0.2.1.apk.sha256
+```
+
+```
+SHA256_PENDIENTE  liquid-calc-v0.2.1.apk
+```
+
+And that it's signed with the project key (SHA-256 certificate fingerprint):
+
+```
+82:B2:D5:E7:86:2B:93:EA:87:9B:4A:0B:39:10:74:3F:77:ED:21:DF:58:D9:B2:47:7D:C4:D9:54:7B:23:4D:00
+```
+
+```bash
+apksigner verify --print-certs liquid-calc-v0.2.1.apk
+```
+
 ## Building
 
 Built on Linux (tested on CachyOS) for Android 12 or later. There's no desktop version.
 
 ```bash
-git clone --recurse-submodules <liquid-calc-url>
+git clone https://github.com/mrsalvaa/liquid-calc.git
 cd liquid-calc
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk   # JDK 17
 export ANDROID_HOME=/path/to/android-sdk          # with platform 35
@@ -58,19 +81,12 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 The release (`./gradlew :app:assembleRelease`) is signed with the key in
 `~/.android-keys/liquid-calc.properties` if it exists, otherwise with the debug key.
 
-### liquid-ui (submodule)
-
-`liquid-ui/` is a git submodule pinned to a tag (currently `v0.1.1`). Its URL in
-`.gitmodules` is relative (`../liquid-ui`): **for now it resolves to a local folder**. Before
-publishing on F-Droid, liquid-ui has to be pushed to a public URL; with both repos under the same
-GitHub account, the relative URL already points to the right place.
-
 ## Layout
 
 ```
 core/        Calculation engine in plain Kotlin (no Android, no dependencies), with tests
-app/         The app: screen, keys, history, settings, physical keyboard
-liquid-ui/   Shared components and settings of the suite (submodule)
+app/         The app: screen, keys, history, settings, physical keyboard; ui/glass holds
+             the glass components (the same as in the other apps)
 DESIGN.md    What is reused from the suite and how (in Spanish)
 ```
 

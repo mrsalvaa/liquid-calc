@@ -2,9 +2,9 @@
 package dev.liquidcalc.data
 
 import dev.liquidcalc.core.AngleUnit
-import dev.liquidui.settings.LiquidDefaults
-import dev.liquidui.settings.LiquidPrefs
-import dev.liquidui.settings.LiquidSettings
+import dev.liquidcalc.ui.glass.LiquidDefaults
+import dev.liquidcalc.ui.glass.LiquidPrefs
+import dev.liquidcalc.ui.glass.LiquidSettings
 import kotlinx.serialization.Serializable
 
 /**

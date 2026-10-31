@@ -53,17 +53,17 @@ import dev.liquidcalc.core.Format
 import dev.liquidcalc.data.History
 import dev.liquidcalc.data.HistoryItem
 import dev.liquidcalc.data.Stores
-import dev.liquidui.components.DialogSpec
-import dev.liquidui.components.EmptyState
-import dev.liquidui.components.GlassButton
-import dev.liquidui.components.GlassIconButton
-import dev.liquidui.components.GlassSurface
-import dev.liquidui.components.LocalDialog
-import dev.liquidui.components.LocalToast
-import dev.liquidui.theme.LocalGlass
-import dev.liquidui.theme.LocalReducedMotion
+import dev.liquidcalc.ui.glass.DialogSpec
+import dev.liquidcalc.ui.glass.EmptyState
+import dev.liquidcalc.ui.glass.GlassButton
+import dev.liquidcalc.ui.glass.GlassIconButton
+import dev.liquidcalc.ui.glass.GlassSurface
+import dev.liquidcalc.ui.glass.LocalDialog
+import dev.liquidcalc.ui.glass.LocalToast
+import dev.liquidcalc.ui.glass.LocalGlass
+import dev.liquidcalc.ui.glass.LocalReducedMotion
 import java.math.BigDecimal
-import dev.liquidui.theme.LocalLiteGlass
+import dev.liquidcalc.ui.glass.LocalLiteGlass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.graphicsLayer
 
@@ -115,7 +115,7 @@ private fun HistoryContent(enabled: Boolean, onClose: () -> Unit) {
     val confirmTitle = stringResource(R.string.clear_history)
     val confirmText = stringResource(R.string.clear_history_confirm)
     val deleteText = stringResource(R.string.delete)
-    val cancelText = stringResource(dev.liquidui.R.string.liquid_cancel)
+    val cancelText = stringResource(R.string.liquid_cancel)
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {

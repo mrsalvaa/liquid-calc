@@ -10,8 +10,7 @@ Calculadora libre para Android, con la misma interfaz de cristal líquido que
 [Liquid Calendar](https://github.com/mrsalvaa/liquid-calendar),
 [Liquid Clock](https://github.com/mrsalvaa/liquid-clock) y
 [Liquid Gallery](https://github.com/mrsalvaa/liquid-gallery), y el mismo estilo Sólido para quien
-prefiera algo más sobrio. Es la primera app de la suite que usa
-[liquid-ui](liquid-ui/README.md), los componentes compartidos.
+prefiera algo más sobrio.
 
 ## Privacidad
 
@@ -42,13 +41,37 @@ y el historial se puede borrar o desactivar en Ajustes.
 - Accesibilidad: cada tecla tiene nombre para TalkBack ("dividido", "seno"), el resultado se
   anuncia solo, las teclas miden 48 dp o más y los textos siguen el contraste del tema.
 
+## Descargar e instalar
+
+Bajá el APK desde [Releases](../../releases) e instalalo (Android 12 o posterior).
+
+Comprobá que el archivo no fue alterado:
+
+```bash
+sha256sum -c liquid-calc-v0.2.1.apk.sha256
+```
+
+```
+SHA256_PENDIENTE  liquid-calc-v0.2.1.apk
+```
+
+Y que está firmado con la clave del proyecto (huella SHA-256 del certificado):
+
+```
+82:B2:D5:E7:86:2B:93:EA:87:9B:4A:0B:39:10:74:3F:77:ED:21:DF:58:D9:B2:47:7D:C4:D9:54:7B:23:4D:00
+```
+
+```bash
+apksigner verify --print-certs liquid-calc-v0.2.1.apk
+```
+
 ## Compilar
 
 Se compila en Linux (probado en CachyOS) para Android 12 o posterior. No hay versión de
 escritorio.
 
 ```bash
-git clone --recurse-submodules <url-de-liquid-calc>
+git clone https://github.com/mrsalvaa/liquid-calc.git
 cd liquid-calc
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk   # JDK 17
 export ANDROID_HOME=/ruta/al/android-sdk          # con la plataforma 35
@@ -60,19 +83,12 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 La release (`./gradlew :app:assembleRelease`) se firma con la clave de
 `~/.android-keys/liquid-calc.properties` si existe, o con la de debug.
 
-### liquid-ui (submódulo)
-
-`liquid-ui/` es un submódulo de git que apunta a un tag (hoy `v0.1.1`). Su URL en
-`.gitmodules` es relativa (`../liquid-ui`): **por ahora resuelve a una carpeta local**. Antes de
-publicar en F-Droid hay que subir liquid-ui a una URL pública; con los dos repos en la misma cuenta
-de GitHub, la URL relativa ya apunta bien.
-
 ## Estructura
 
 ```
 core/        Motor de cálculo en Kotlin puro (sin Android ni dependencias), con tests
-app/         La app: pantalla, teclas, historial, ajustes, teclado físico
-liquid-ui/   Componentes y ajustes compartidos de la suite (submódulo)
+app/         La app: pantalla, teclas, historial, ajustes, teclado físico; ui/glass son
+             los componentes de cristal (los mismos que en las otras apps)
 DESIGN.md    Qué se reutiliza de la suite y cómo
 ```
 

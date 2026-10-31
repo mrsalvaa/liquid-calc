@@ -3,18 +3,20 @@
 SPDX-License-Identifier: GPL-3.0-or-later
 
 Este documento es la receta para las próximas apps de la suite (phone, contacts, messages): qué
-se toma de [liquid-ui](liquid-ui/README.md), qué valores no se tocan y qué decide cada app. La
-referencia es Liquid Calendar; liquid-ui es su `ui/glass` extraído, sin cambios de aspecto.
+se copia de `ui/glass`, qué valores no se tocan y qué decide cada app. Como Calendar, Clock y
+Gallery, cada app tiene su propia copia de `ui/glass`. La de Calc
+(`app/src/main/java/dev/liquidcalc/ui/glass`) sale de Liquid Calendar sin cambios de aspecto y
+es la más completa: suma los ajustes compartidos, la tarjeta de Apariencia, los íconos de
+launcher y las mejoras de rendimiento. Las próximas apps parten de esta copia.
 
 ## Regla general
 
-- La interfaz se arma con los componentes de liquid-ui (`GlassSurface`, `GlassCard`,
+- La interfaz se arma con los componentes de `ui/glass` (`GlassSurface`, `GlassCard`,
   `GlassButton`, `GlassChip`, `GlassSwitch`, `SettingRow`, `BackTitle`…). No se dibujan
   superficies propias con `background()` ni se cambian colores, radios o blur a mano.
-- Lo que haga falta y no exista se agrega a liquid-ui (con un tag nuevo), no a la app.
-- La app apunta su submódulo a un tag de liquid-ui, nunca a una rama.
+- Lo que haga falta y no exista se agrega a `ui/glass`, pensado para que sirva a las otras apps.
 
-## Colores (`dev.liquidui.theme`)
+## Colores (`Theme.kt`)
 
 | Paleta | Fondo | Texto | Texto secundario | Acento |
 |---|---|---|---|---|
@@ -92,14 +94,14 @@ la vez (el teclado de Calc, 45 teclas) no llega a 120 Hz. Por eso:
 - **Interfaz**: Material Icons (Apache-2.0). Se escriben en su versión **Rounded**; en Sólido
   se dibuja la **Outlined**. Cada app registra al arrancar los pares que usa:
   `SolidIcons.register(mapOf(Icons.Rounded.X to Icons.Outlined.X, …))`. Los componentes de
-  liquid-ui ya pasan los íconos por `styled()`; si una app dibuja un `Icon` propio, también.
+  `ui/glass` ya pasan los íconos por `styled()`; si una app dibuja un `Icon` propio, también.
 - **Launcher**: cinco estilos en el mismo orden en toda la suite (`AppIcons.STYLES`):
   0 Liquid, 1 Material, 2 Samsung, 3 iPhone, 4 Motorola, más un ícono monocromo para los íconos
   temáticos. Son vectores originales (sin assets de nadie) con la paleta de cada estilo; los
   fondos son los de Calendar. Cada uno es un `activity-alias` (`.IconLiquid`, `.IconMaterial`,
   `.IconSamsung`, `.IconIphone`, `.IconMotorola`) y solo uno está activo.
 
-## Ajustes compartidos (`dev.liquidui.settings`)
+## Ajustes compartidos (`LiquidSettings.kt`, `JsonStore.kt`)
 
 `files/settings.json`, plano, escrito con `JsonStore` (ignora campos desconocidos y escribe los
 valores por defecto). La clase de ajustes de la app implementa `LiquidSettings`:
@@ -125,8 +127,8 @@ valores por defecto). La clase de ajustes de la app implementa `LiquidSettings`:
 
 ## Textos
 
-Inglés por defecto y español en `values-es`, con voseo rioplatense. Los textos de liquid-ui llevan
-el prefijo `liquid_` para que ninguna app los pise sin querer.
+Inglés por defecto y español en `values-es`, con voseo rioplatense. Los textos de `ui/glass` llevan
+el prefijo `liquid_`, así se distinguen de los de la app.
 
 ## Privacidad y manifest
 
@@ -138,7 +140,7 @@ mergeado del APK con `aapt2 dump xmltree`.
 
 ## Checklist para una app nueva
 
-1. `git submodule add ../liquid-ui liquid-ui` y fijarlo al último tag; `include(":liquid-ui")`.
+1. Copiar `ui/glass` de Calc (cambiando el paquete) y los textos `liquid_*` de `strings.xml`.
 2. Copiar `gradle/libs.versions.toml` (las mismas versiones).
 3. `AppSettings` implementa `LiquidSettings` con `LiquidDefaults`; elegir el `appIcon` por defecto.
 4. `GlassTheme(settings.glassStyle)` y `GlassRoot` en la actividad; `SolidIcons.register` en

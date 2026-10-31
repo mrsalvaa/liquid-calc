@@ -16,8 +16,8 @@ import androidx.compose.material.icons.rounded.Functions
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Settings
 import dev.liquidcalc.data.Stores
-import dev.liquidui.icons.AppIcons
-import dev.liquidui.icons.SolidIcons
+import dev.liquidcalc.ui.glass.AppIcons
+import dev.liquidcalc.ui.glass.SolidIcons
 
 class CalcApp : Application() {
     override fun onCreate() {

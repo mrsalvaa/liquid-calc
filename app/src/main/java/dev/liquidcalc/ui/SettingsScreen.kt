@@ -21,14 +21,14 @@ import dev.liquidcalc.R
 import dev.liquidcalc.data.AppSettings
 import dev.liquidcalc.data.History
 import dev.liquidcalc.data.Stores
-import dev.liquidui.components.BackTitle
-import dev.liquidui.components.ChipRow
-import dev.liquidui.components.GlassCard
-import dev.liquidui.components.GlassSwitch
-import dev.liquidui.components.SectionLabel
-import dev.liquidui.components.SettingRow
-import dev.liquidui.settings.AppearanceCard
-import dev.liquidui.theme.LocalGlass
+import dev.liquidcalc.ui.glass.BackTitle
+import dev.liquidcalc.ui.glass.ChipRow
+import dev.liquidcalc.ui.glass.GlassCard
+import dev.liquidcalc.ui.glass.GlassSwitch
+import dev.liquidcalc.ui.glass.SectionLabel
+import dev.liquidcalc.ui.glass.SettingRow
+import dev.liquidcalc.ui.glass.AppearanceCard
+import dev.liquidcalc.ui.glass.LocalGlass
 
 @Composable
 fun SettingsScreen(s: AppSettings, onBack: () -> Unit) {

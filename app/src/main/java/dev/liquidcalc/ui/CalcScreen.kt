@@ -72,16 +72,16 @@ import dev.liquidcalc.core.CalcError
 import dev.liquidcalc.core.Format
 import dev.liquidcalc.data.AppSettings
 import dev.liquidcalc.data.Stores
-import dev.liquidui.components.DialogHost
-import dev.liquidui.components.DialogSpec
-import dev.liquidui.components.GlassIconButton
-import dev.liquidui.components.GlassSurface
-import dev.liquidui.components.LocalDialog
-import dev.liquidui.components.LocalToast
-import dev.liquidui.components.ToastHost
-import dev.liquidui.theme.GlassRoot
-import dev.liquidui.theme.LocalGlass
-import dev.liquidui.theme.LocalReducedMotion
+import dev.liquidcalc.ui.glass.DialogHost
+import dev.liquidcalc.ui.glass.DialogSpec
+import dev.liquidcalc.ui.glass.GlassIconButton
+import dev.liquidcalc.ui.glass.GlassSurface
+import dev.liquidcalc.ui.glass.LocalDialog
+import dev.liquidcalc.ui.glass.LocalToast
+import dev.liquidcalc.ui.glass.ToastHost
+import dev.liquidcalc.ui.glass.GlassRoot
+import dev.liquidcalc.ui.glass.LocalGlass
+import dev.liquidcalc.ui.glass.LocalReducedMotion
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.DecimalFormatSymbols
@@ -90,13 +90,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import dev.liquidui.icons.styled
+import dev.liquidcalc.ui.glass.styled
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import dev.liquidui.theme.LocalLiteGlass
+import dev.liquidcalc.ui.glass.LocalLiteGlass
 
 /** Raíz de la app: la calculadora, o los ajustes encima; el historial y los avisos flotan. */
 @Composable
