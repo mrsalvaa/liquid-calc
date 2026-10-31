@@ -4,7 +4,7 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
-## Unreleased
+## 0.3.0
 
 ### New
 - Holding "delete" for 2 seconds clears everything, with a light "pop" on the display.
