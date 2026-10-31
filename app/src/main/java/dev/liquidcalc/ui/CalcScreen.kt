@@ -86,14 +86,16 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.DecimalFormatSymbols
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import dev.liquidui.icons.styled
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 
 /** Raíz de la app: la calculadora, o los ajustes encima; el historial y los avisos flotan. */
 @Composable
@@ -358,26 +360,8 @@ private fun ResultText(text: String, spoken: String?, big: Boolean, onCopy: () -
         }
     }
     val copyLabel = stringResource(R.string.copy)
-    Column(horizontalAlignment = Alignment.End) {
-        AnimatedVisibility(menu, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
-            GlassSurface(
-                Modifier.padding(bottom = 6.dp).height(44.dp),
-                shape = CircleShape,
-                strong = true,
-                frost = 4.dp,
-                shadowRadius = 8.dp,
-                onClick = {
-                    onCopy()
-                    menu = false
-                },
-            ) {
-                Row(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(styled(Icons.Rounded.ContentCopy), null, Modifier.size(18.dp), tint = p.accentFg)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.copy_short), fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                }
-            }
-        }
+    // La burbuja flota encima del número sin ocupar lugar: así el número no cambia de tamaño.
+    Box(contentAlignment = Alignment.BottomEnd) {
         BasicText(
             text,
             Modifier
@@ -407,6 +391,30 @@ private fun ResultText(text: String, spoken: String?, big: Boolean, onCopy: () -
                 TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = 26.sp)
             },
         )
+        AnimatedVisibility(
+            menu,
+            Modifier.align(Alignment.TopEnd).offset(y = (-50).dp),
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut() + scaleOut(targetScale = 0.9f),
+        ) {
+            GlassSurface(
+                Modifier.height(44.dp),
+                shape = CircleShape,
+                strong = true,
+                frost = 4.dp,
+                shadowRadius = 8.dp,
+                onClick = {
+                    onCopy()
+                    menu = false
+                },
+            ) {
+                Row(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(styled(Icons.Rounded.ContentCopy), null, Modifier.size(18.dp), tint = p.accentFg)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.copy_short), fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+        }
     }
 }
 
