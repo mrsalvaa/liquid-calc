@@ -4,6 +4,12 @@
 
 [English](CHANGELOG.md) | **Español**
 
+## Sin publicar
+
+### Arreglos
+- Mantener apretado "borrar" borra todo más rápido (0,7 s en vez de 2 s).
+- El fondo ya no cambia mientras se toca la pantalla; solo deja de moverse.
+
 ## 0.3.0
 
 ### Novedades

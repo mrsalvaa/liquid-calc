@@ -4,6 +4,12 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
+## Unreleased
+
+### Fixed
+- Holding "delete" clears everything faster (0.7 s instead of 2 s).
+- The background no longer changes while you touch the screen; it just stops moving.
+
 ## 0.3.0
 
 ### New

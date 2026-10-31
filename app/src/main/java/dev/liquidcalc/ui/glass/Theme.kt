@@ -405,7 +405,7 @@ fun GlassRoot(
             },
     ) {
         Box(Modifier.fillMaxSize().layerBackdrop(page)) {
-            LiquidBackground(Modifier.fillMaxSize().layerBackdrop(background), animated && !touching)
+            LiquidBackground(Modifier.fillMaxSize().layerBackdrop(background), animated, paused = touching)
             CompositionLocalProvider(LocalBackdrop provides background) {
                 Box(Modifier.fillMaxSize(), content = content)
             }
@@ -428,7 +428,7 @@ fun GlassRoot(
 private const val TOUCH_PAUSE_MS = 1500L
 
 @Composable
-fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true) {
+fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true, paused: Boolean = false) {
     val p = LocalGlass.current
     val animated = animate && !LocalReducedMotion.current
     // Las manchas se mueven tan despacio (una vuelta cada 90 s) que basta con moverlas ~15 veces
@@ -436,8 +436,9 @@ fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true) {
     // en cada fotograma (120 veces por segundo) aunque no se toque nada.
     var phase by remember { mutableFloatStateOf(0.8f) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(animated, lifecycle, p.blobs.isEmpty()) {
-        if (!animated || p.blobs.isEmpty()) return@LaunchedEffect
+    // En pausa las manchas se quedan donde están, con el mismo aspecto: solo dejan de moverse.
+    LaunchedEffect(animated, paused, lifecycle, p.blobs.isEmpty()) {
+        if (!animated || paused || p.blobs.isEmpty()) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (true) {
                 phase = (SystemClock.uptimeMillis() % 90_000L) / 90_000f * (2 * PI).toFloat()

@@ -61,7 +61,7 @@ class CalcKey(
 )
 
 /** Cuánto hay que mantener apretada una tecla para su acción larga. */
-const val HOLD_MS = 2000L
+const val HOLD_MS = 700L
 
 /** Teclas en filas iguales que ocupan todo el lugar disponible. */
 @Composable
