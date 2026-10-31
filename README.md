@@ -32,6 +32,7 @@ history can be cleared or turned off in Settings.
 - Local **history**: tap a calculation to bring it back. Clear it all, or turn it off (which also
   clears it) in Settings.
 - Copy the result: long-press the number and tap "Copy".
+- Hold "delete" for 2 seconds to clear everything.
 - **Physical keyboard**: digits and `+ - * / ^ % ! ( )`; Enter or `=` calculates, Backspace
   deletes, Esc or Delete clears. Letters: `s` sin, `c` cos, `t` tan, `l` ln, `g` log,
   `r` √, `p` π, `e`, `a` ANS. Ctrl+C copies, Ctrl+V pastes, Ctrl+H opens the history and

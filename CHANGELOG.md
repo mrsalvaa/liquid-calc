@@ -4,6 +4,11 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
+## Unreleased
+
+### New
+- Holding "delete" for 2 seconds clears everything, with a light "pop" on the display.
+
 ## 0.2.1
 
 ### New

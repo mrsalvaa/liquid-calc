@@ -29,6 +29,16 @@ object Session {
     var error by mutableStateOf<CalcError?>(null)
         private set
 
+    /** Cuántas veces se borró todo manteniendo "borrar": la pantalla lo usa para el "pop". */
+    var clears by mutableStateOf(0)
+        private set
+
+    /** Borrar todo (mantener "borrar" apretado). */
+    fun clearAll() {
+        edit { it.clear() }
+        clears++
+    }
+
     fun edit(change: (Editor) -> Editor) {
         editor = change(editor)
         error = null

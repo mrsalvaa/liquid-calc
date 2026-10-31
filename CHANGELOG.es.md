@@ -4,6 +4,11 @@
 
 [English](CHANGELOG.md) | **Español**
 
+## Sin publicar
+
+### Novedades
+- Mantener apretado "borrar" 2 segundos borra todo, con un "pop" leve en la pantalla.
+
 ## 0.2.1
 
 ### Novedades

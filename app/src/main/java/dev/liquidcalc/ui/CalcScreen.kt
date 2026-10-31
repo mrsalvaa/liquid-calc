@@ -97,6 +97,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import dev.liquidcalc.ui.glass.LocalLiteGlass
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 
 /** Raíz de la app: la calculadora, o los ajustes encima; el historial y los avisos flotan. */
 @Composable
@@ -300,9 +304,27 @@ private fun CalcDisplay(angle: AngleUnit, separator: Char, onCopy: () -> Unit, m
     val resultSpoken = result?.let { stringResource(R.string.result_cd, it) }
     val expressionSpoken = stringResource(R.string.expression_cd, editor.expression)
 
+    // "Pop" al borrar todo: el contenido arranca un poco más chico desde la esquina del número y
+    // vuelve a su tamaño con un rebote suave (sin animación si el sistema pide quitarlas).
+    val reduced = LocalReducedMotion.current
+    // Se crea ya achicado en el mismo cuadro en que se borra (si no, el "0" se vería un cuadro
+    // a tamaño completo antes de achicarse).
+    val clears = Session.clears
+    val pop = remember(clears) { Animatable(if (clears > 0 && !reduced) 0.85f else 1f) }
+    LaunchedEffect(pop) {
+        pop.animateTo(1f, spring(dampingRatio = 0.45f, stiffness = 500f))
+    }
+
     GlassSurface(modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), frost = 14.dp) {
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp),
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = pop.value
+                    scaleY = pop.value
+                    transformOrigin = TransformOrigin(1f, 1f)
+                }
+                .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Bottom,
         ) {
@@ -465,7 +487,14 @@ private fun basicKeys(angle: AngleUnit, separator: Char): List<List<CalcKey>> {
         listOf(
             digit('0'),
             CalcKey(separator.toString(), R.string.key_decimal, KeyKind.DIGIT) { Session.edit { it.decimal() } },
-            CalcKey("", R.string.key_backspace, KeyKind.CLEAR, Icons.AutoMirrored.Rounded.Backspace) { Session.edit { it.backspace() } },
+            CalcKey(
+                "",
+                R.string.key_backspace,
+                KeyKind.CLEAR,
+                Icons.AutoMirrored.Rounded.Backspace,
+                holdLabel = R.string.key_clear,
+                onHold = { Session.clearAll() },
+            ) { Session.edit { it.backspace() } },
             CalcKey("=", R.string.key_equals, KeyKind.EQUALS) { Session.equals(angle) },
         ),
     )

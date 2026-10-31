@@ -32,21 +32,36 @@ import dev.liquidcalc.ui.glass.GlassSurface
 import dev.liquidcalc.ui.glass.styled
 import dev.liquidcalc.ui.glass.LocalGlass
 import dev.liquidcalc.ui.glass.accentFill
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.onLongClick
 
 /** Cómo se ve una tecla: números, operadores, funciones, "=" o borrar. */
 enum class KeyKind { DIGIT, OPERATOR, FUNCTION, EQUALS, CLEAR }
 
 /**
  * Una tecla. [spoken] es lo que lee TalkBack ("dividido", "seno"); si es null, lee [label].
- * [icon], si está, reemplaza al texto (borrar).
+ * [icon], si está, reemplaza al texto (borrar). [onHold] se ejecuta si se mantiene apretada
+ * [HOLD_MS] (borrar: todo); [holdLabel] es cómo lo anuncia TalkBack.
  */
 class CalcKey(
     val label: String,
     @StringRes val spoken: Int?,
     val kind: KeyKind,
     val icon: ImageVector? = null,
+    @StringRes val holdLabel: Int? = null,
+    val onHold: (() -> Unit)? = null,
     val onClick: () -> Unit,
 )
+
+/** Cuánto hay que mantener apretada una tecla para su acción larga. */
+const val HOLD_MS = 2000L
 
 /** Teclas en filas iguales que ocupan todo el lugar disponible. */
 @Composable
@@ -69,10 +84,18 @@ fun KeyButton(key: CalcKey, modifier: Modifier = Modifier) {
     val p = LocalGlass.current
     val haptics = LocalHapticFeedback.current
     val spoken = key.spoken?.let { stringResource(it) } ?: key.label
+    // Si se mantuvo apretada hasta la acción larga, al soltar no se hace también la corta.
+    var held by remember { mutableStateOf(false) }
     val press = {
-        haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
-        key.onClick()
+        if (held) {
+            held = false
+        } else {
+            haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
+            key.onClick()
+        }
     }
+    val hold = key.onHold
+    val holdLabel = key.holdLabel?.let { stringResource(it) }
     val color = when (key.kind) {
         KeyKind.DIGIT, KeyKind.FUNCTION -> p.content
         KeyKind.OPERATOR, KeyKind.CLEAR -> p.accentFg
@@ -81,10 +104,35 @@ fun KeyButton(key: CalcKey, modifier: Modifier = Modifier) {
     GlassSurface(
         modifier
             .padding(4.dp)
+            .then(
+                if (hold == null) {
+                    Modifier
+                } else {
+                    // Mantenerla [HOLD_MS]: la acción larga apenas se cumple el tiempo, sin esperar a soltar.
+                    Modifier.pointerInput(hold) {
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false)
+                            held = false
+                            // null solo si se cumple el tiempo (soltar o cancelar terminan antes con true;
+                            // waitForUpOrCancellation da null también si el botón ya usó el evento).
+                            val released = withTimeoutOrNull(HOLD_MS) {
+                                waitForUpOrCancellation()
+                                true
+                            }
+                            if (released == null) {
+                                held = true
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                hold()
+                            }
+                        }
+                    }
+                },
+            )
             .clearAndSetSemantics {
                 contentDescription = spoken
                 role = Role.Button
                 onClick { press(); true }
+                if (hold != null) onLongClick(holdLabel) { hold(); true }
             },
         shape = CircleShape,
         strong = key.kind != KeyKind.DIGIT,
