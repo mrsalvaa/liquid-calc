@@ -60,7 +60,7 @@ The release (`./gradlew :app:assembleRelease`) is signed with the key in
 
 ### liquid-ui (submodule)
 
-`liquid-ui/` is a git submodule pinned to a tag (currently `v0.1.0`). Its URL in
+`liquid-ui/` is a git submodule pinned to a tag (currently `v0.1.1`). Its URL in
 `.gitmodules` is relative (`../liquid-ui`): **for now it resolves to a local folder**. Before
 publishing on F-Droid, liquid-ui has to be pushed to a public URL; with both repos under the same
 GitHub account, the relative URL already points to the right place.

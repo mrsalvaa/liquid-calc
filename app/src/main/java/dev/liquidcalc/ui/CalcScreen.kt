@@ -96,6 +96,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import dev.liquidui.theme.LocalLiteGlass
 
 /** Raíz de la app: la calculadora, o los ajustes encima; el historial y los avisos flotan. */
 @Composable
@@ -122,7 +123,9 @@ fun CalcScreen(settings: AppSettings) {
         LocalDialog provides { dialog = it },
     ) {
         GlassRoot(
-            animated = settings.animatedBackground,
+            // Con el historial abierto el fondo queda tapado: animarlo no se ve y hace que el
+            // panel tenga que volver a desenfocarse en cada paso de la animación.
+            animated = settings.animatedBackground && !showHistory,
             floating = {
                 HistoryPanel(
                     visible = showHistory && !showSettings,
@@ -138,15 +141,20 @@ fun CalcScreen(settings: AppSettings) {
                 transitionSpec = { fadeIn(tween(if (reduced) 0 else 200)) togetherWith fadeOut(tween(if (reduced) 0 else 120)) },
                 label = "screen",
             ) { settingsOpen ->
-                if (settingsOpen) {
-                    SettingsScreen(settings, onBack = { showSettings = false })
-                } else {
-                    Calculator(
-                        settings,
-                        separator,
-                        onHistory = { showHistory = !showHistory },
-                        onSettings = { showSettings = true; showHistory = false },
-                    )
+                // Superficies livianas en todo el contenido (unas 45 en la calculadora, tarjetas
+                // que se deslizan en Ajustes): sin refracción va fluido aun con el fondo en
+                // movimiento (ver LocalLiteGlass). El historial flota aparte y sí refracta.
+                CompositionLocalProvider(LocalLiteGlass provides true) {
+                    if (settingsOpen) {
+                        SettingsScreen(settings, onBack = { showSettings = false })
+                    } else {
+                        Calculator(
+                            settings,
+                            separator,
+                            onHistory = { showHistory = !showHistory },
+                            onSettings = { showSettings = true; showHistory = false },
+                        )
+                    }
                 }
             }
         }

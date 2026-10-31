@@ -62,7 +62,7 @@ La release (`./gradlew :app:assembleRelease`) se firma con la clave de
 
 ### liquid-ui (submódulo)
 
-`liquid-ui/` es un submódulo de git que apunta a un tag (hoy `v0.1.0`). Su URL en
+`liquid-ui/` es un submódulo de git que apunta a un tag (hoy `v0.1.1`). Su URL en
 `.gitmodules` es relativa (`../liquid-ui`): **por ahora resuelve a una carpeta local**. Antes de
 publicar en F-Droid hay que subir liquid-ui a una URL pública; con los dos repos en la misma cuenta
 de GitHub, la URL relativa ya apunta bien.

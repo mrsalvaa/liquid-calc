@@ -63,6 +63,9 @@ import dev.liquidui.components.LocalToast
 import dev.liquidui.theme.LocalGlass
 import dev.liquidui.theme.LocalReducedMotion
 import java.math.BigDecimal
+import dev.liquidui.theme.LocalLiteGlass
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * Historial como panel de cristal desde abajo (refracta la calculadora). Tocar una cuenta la
@@ -145,11 +148,15 @@ private fun HistoryContent(enabled: Boolean, onClose: () -> Unit) {
         when {
             !enabled -> EmptyState(stringResource(R.string.history_off), stringResource(R.string.history_off_hint))
             items.isEmpty() -> EmptyState(stringResource(R.string.history_empty), stringResource(R.string.history_empty_hint))
-            else -> LazyColumn(contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp)) {
-                items(items, key = { it.time.toString() + it.expression }) { item ->
-                    HistoryRow(item) {
-                        Session.edit { it.set(item.expression) }
-                        onClose()
+            // Las filas, livianas: refractar cada una mientras se desliza el panel es carísimo.
+            else -> CompositionLocalProvider(LocalLiteGlass provides true) {
+                // En su propia capa: deslizar la lista no obliga a volver a desenfocar el panel.
+                LazyColumn(Modifier.graphicsLayer {}, contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp)) {
+                    items(items, key = { it.time.toString() + it.expression }) { item ->
+                        HistoryRow(item) {
+                            Session.edit { it.set(item.expression) }
+                            onClose()
+                        }
                     }
                 }
             }

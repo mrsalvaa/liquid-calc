@@ -10,4 +10,4 @@
 - Calculadora básica y científica con aritmética decimal exacta (0,1 + 0,2 = 0,3) y un parser propio.
 - Trigonometría en grados o radianes, logaritmos, potencias, raíces, factorial, π y e; porcentaje de calculadora; memoria y ANS.
 - Historial local que se puede borrar o desactivar; copiar el resultado; teclado físico con atajos.
-- Estilos Liquid Glass y Sólido con los ajustes compartidos de la suite (liquid-ui 0.1.0).
+- Estilos Liquid Glass y Sólido con los ajustes compartidos de la suite (liquid-ui 0.1.1), fluidos a 120 Hz aun con el fondo en movimiento.

@@ -69,6 +69,24 @@ referencia es Liquid Calendar; liquid-ui es su `ui/glass` extraído, sin cambios
 - Barra inferior: spring 0,62 / 420. Interruptor: 0,55 / 600. Paneles que suben: 0,8 / 500.
 - Todo respeta `LocalReducedMotion` (Accesibilidad → Quitar animaciones).
 
+## Rendimiento
+
+La pantalla redibuja todo en cada cuadro, y con el fondo en movimiento cada superficie de cristal
+refracta y desenfoca lo que tiene atrás. Con pocas superficies (Calendar) no se nota; con muchas a
+la vez (el teclado de Calc, 45 teclas) no llega a 120 Hz. Por eso:
+
+- **`LocalLiteGlass`**: en pantallas con muchas superficies, la app las pide livianas (el mismo
+  dibujo que con fondo liso: tinte, brillo y borde; en oscuro, sin sombra). Calc lo usa en todo
+  el contenido; lo que flota encima (el panel del historial) sigue refractando de verdad.
+- **Filas de un panel que se desliza**: livianas y la lista en su propia capa
+  (`Modifier.graphicsLayer {}`), así deslizar no obliga a volver a desenfocar el panel.
+- **Fondo animado**: `GlassRoot` lo pausa mientras se toca la pantalla y la app lo pausa cuando
+  lo tapa un panel (en Calc, con el historial abierto). Está en su propia textura: solo se
+  repinta cuando se mueve.
+- **Medir con la build `profile`** (optimizada como la release, instalable como `.debug`): la
+  debug de Compose va lenta por sí sola. `adb shell dumpsys gfxinfo <paquete> framestats` dice
+  si el tiempo se va en el hilo de la interfaz, en el de dibujo o en la GPU.
+
 ## Íconos
 
 - **Interfaz**: Material Icons (Apache-2.0). Se escriben en su versión **Rounded**; en Sólido
@@ -120,7 +138,7 @@ mergeado del APK con `aapt2 dump xmltree`.
 
 ## Checklist para una app nueva
 
-1. `git submodule add ../liquid-ui liquid-ui` y fijarlo a un tag; `include(":liquid-ui")`.
+1. `git submodule add ../liquid-ui liquid-ui` y fijarlo al último tag; `include(":liquid-ui")`.
 2. Copiar `gradle/libs.versions.toml` (las mismas versiones).
 3. `AppSettings` implementa `LiquidSettings` con `LiquidDefaults`; elegir el `appIcon` por defecto.
 4. `GlassTheme(settings.glassStyle)` y `GlassRoot` en la actividad; `SolidIcons.register` en
