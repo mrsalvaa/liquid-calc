@@ -4,7 +4,7 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
-## Unreleased
+## 0.3.1
 
 ### Fixed
 - Holding "delete" clears everything faster (0.7 s instead of 2 s).

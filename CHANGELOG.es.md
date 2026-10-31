@@ -4,7 +4,7 @@
 
 [English](CHANGELOG.md) | **Español**
 
-## Sin publicar
+## 0.3.1
 
 ### Arreglos
 - Mantener apretado "borrar" borra todo más rápido (0,7 s en vez de 2 s).
