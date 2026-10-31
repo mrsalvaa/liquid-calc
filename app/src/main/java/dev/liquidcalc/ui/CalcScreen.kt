@@ -85,6 +85,15 @@ import dev.liquidui.theme.LocalReducedMotion
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.DecimalFormatSymbols
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import dev.liquidui.icons.styled
+import kotlinx.coroutines.delay
 
 /** Raíz de la app: la calculadora, o los ajustes encima; el historial y los avisos flotan. */
 @Composable
@@ -266,7 +275,8 @@ private fun AngleToggle(angle: AngleUnit, onClick: () -> Unit) {
 
 /**
  * La pantalla: mientras se escribe, la expresión grande y el resultado parcial abajo; después
- * de "=", la cuenta chica arriba y el resultado grande. Tocar el resultado y mantener lo copia.
+ * de "=", la cuenta chica arriba y el resultado grande. Manteniendo apretado el resultado aparece
+ * "Copiar".
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -294,10 +304,6 @@ private fun CalcDisplay(angle: AngleUnit, separator: Char, onCopy: () -> Unit, m
                         Text("M", color = p.accentFg, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                         Text(" $mem", color = p.contentSecondary, fontSize = 13.sp, maxLines = 1)
                     }
-                }
-                Spacer(Modifier.weight(1f))
-                if (result != null) {
-                    GlassIconButton(Icons.Rounded.ContentCopy, stringResource(R.string.copy), onCopy, size = 40.dp)
                 }
             }
             Spacer(Modifier.weight(1f))
@@ -335,30 +341,73 @@ private fun CalcDisplay(angle: AngleUnit, separator: Char, onCopy: () -> Unit, m
     }
 }
 
+/**
+ * El resultado. Mantenerlo apretado muestra la burbuja "Copiar" encima; se va sola a los pocos
+ * segundos o cuando cambia el número.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ResultText(text: String, spoken: String?, big: Boolean, onCopy: () -> Unit) {
     val p = LocalGlass.current
-    BasicText(
-        text,
-        Modifier
-            .combinedClickable(remember { MutableInteractionSource() }, null, onClick = {}, onLongClick = onCopy)
-            .semantics {
-                if (spoken != null) contentDescription = spoken
-                liveRegion = LiveRegionMode.Polite
+    val haptics = LocalHapticFeedback.current
+    var menu by remember(text) { mutableStateOf(false) }
+    LaunchedEffect(menu) {
+        if (menu) {
+            delay(4000)
+            menu = false
+        }
+    }
+    val copyLabel = stringResource(R.string.copy)
+    Column(horizontalAlignment = Alignment.End) {
+        AnimatedVisibility(menu, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
+            GlassSurface(
+                Modifier.padding(bottom = 6.dp).height(44.dp),
+                shape = CircleShape,
+                strong = true,
+                frost = 4.dp,
+                shadowRadius = 8.dp,
+                onClick = {
+                    onCopy()
+                    menu = false
+                },
+            ) {
+                Row(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(styled(Icons.Rounded.ContentCopy), null, Modifier.size(18.dp), tint = p.accentFg)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.copy_short), fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+        }
+        BasicText(
+            text,
+            Modifier
+                .combinedClickable(
+                    remember { MutableInteractionSource() },
+                    null,
+                    onLongClickLabel = copyLabel,
+                    onClick = { menu = false },
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        menu = true
+                    },
+                )
+                .semantics {
+                    if (spoken != null) contentDescription = spoken
+                    liveRegion = LiveRegionMode.Polite
+                },
+            style = TextStyle(
+                color = if (big) p.content else p.contentSecondary,
+                fontWeight = if (big) FontWeight.Light else FontWeight.Normal,
+                textAlign = TextAlign.End,
+            ),
+            maxLines = 1,
+            autoSize = if (big) {
+                TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = 64.sp)
+            } else {
+                TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = 26.sp)
             },
-        style = TextStyle(
-            color = if (big) p.content else p.contentSecondary,
-            fontWeight = if (big) FontWeight.Light else FontWeight.Normal,
-            textAlign = TextAlign.End,
-        ),
-        maxLines = 1,
-        autoSize = if (big) {
-            TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = 64.sp)
-        } else {
-            TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = 26.sp)
-        },
-    )
+        )
+    }
 }
 
 @Composable

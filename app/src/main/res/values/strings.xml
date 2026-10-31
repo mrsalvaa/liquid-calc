@@ -58,6 +58,7 @@
     <string name="save_history">Save history</string>
     <string name="save_history_hint">Calculations stay on this device only. Turning it off deletes what was saved.</string>
     <string name="copy">Copy result</string>
+    <string name="copy_short">Copy</string>
     <string name="copied">Copied</string>
     <string name="settings">Settings</string>
     <string name="calculator_section">Calculator</string>

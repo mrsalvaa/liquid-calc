@@ -58,6 +58,7 @@
     <string name="save_history">Guardar historial</string>
     <string name="save_history_hint">Las cuentas quedan solo en este celu. Al desactivarlo se borra lo guardado.</string>
     <string name="copy">Copiar resultado</string>
+    <string name="copy_short">Copiar</string>
     <string name="copied">Copiado</string>
     <string name="settings">Ajustes</string>
     <string name="calculator_section">Calculadora</string>

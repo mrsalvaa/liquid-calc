@@ -33,7 +33,7 @@ y el historial se puede borrar o desactivar en Ajustes.
   demasiado grande o expresión incompleta.
 - **Historial** local: tocar una cuenta la vuelve a poner en pantalla. Se borra entero o se
   desactiva (y se borra) desde Ajustes.
-- Copiar el resultado con el botón o manteniendo apretado el número.
+- Copiar el resultado: manteniendo apretado el número aparece "Copiar".
 - **Teclado físico**: números y `+ - * / ^ % ! ( )`; Enter o `=` calcula, Retroceso borra,
   Esc o Supr limpia. Letras: `s` sin, `c` cos, `t` tan, `l` ln, `g` log, `r` √, `p` π,
   `e`, `a` ANS. Ctrl+C copia, Ctrl+V pega, Ctrl+H abre el historial y Ctrl+D cambia entre
