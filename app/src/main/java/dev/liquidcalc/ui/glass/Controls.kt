@@ -318,6 +318,7 @@ fun GlassNavBar(
         modifier.fillMaxWidth().height(70.dp),
         shape = CircleShape,
         strong = true,
+        tint = p.pillVeil(),
         frost = 4.dp,
     ) {
         BoxWithConstraints(

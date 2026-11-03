@@ -4,6 +4,11 @@
 
 [English](CHANGELOG.md) | **Español**
 
+## 0.3.2
+
+### Cambios
+- Valores del cristal alineados con el resto de la suite. No cambia nada en pantalla.
+
 ## 0.3.1
 
 ### Arreglos

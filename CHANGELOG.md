@@ -4,6 +4,11 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
+## 0.3.2
+
+### Changed
+- Glass values aligned with the rest of the suite. Nothing changes on screen.
+
 ## 0.3.1
 
 ### Fixed
