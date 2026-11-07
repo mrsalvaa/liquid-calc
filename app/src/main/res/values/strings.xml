@@ -85,7 +85,7 @@
     <string name="liquid_app_icon_hint">The launcher may take a few seconds to show the new icon, and you might have to add it to the home screen again.</string>
     <string name="liquid_back">Back</string>
     <string name="liquid_background">Background</string>
-    <string name="liquid_background_accent">Accent color</string>
+    <string name="liquid_background_accent">Accent</string>
     <string name="liquid_background_moving">Moving</string>
     <string name="liquid_background_plain">Plain</string>
     <string name="liquid_background_plain_hint">Plain background with the theme\'s blue: lighter in dark mode, deeper in light mode.</string>

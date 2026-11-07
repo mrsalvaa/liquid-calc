@@ -85,7 +85,7 @@
     <string name="liquid_app_icon_hint">El launcher puede tardar unos segundos en mostrar el ícono nuevo, y capaz tenés que volver a ponerlo en la pantalla de inicio.</string>
     <string name="liquid_back">Volver</string>
     <string name="liquid_background">Fondo</string>
-    <string name="liquid_background_accent">Color de énfasis</string>
+    <string name="liquid_background_accent">Énfasis</string>
     <string name="liquid_background_moving">En movimiento</string>
     <string name="liquid_background_plain">Liso</string>
     <string name="liquid_background_plain_hint">Fondo liso con el azul del tema: más claro en oscuro, más intenso en claro.</string>

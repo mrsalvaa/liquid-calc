@@ -48,5 +48,5 @@
     <!-- Igual -->
     <path
         android:pathData="M62.0,68.0h3a2,2 0,0 1,2,2v3a2,2 0,0 1,-2,2h-3a2,2 0,0 1,-2,-2v-3a2,2 0,0 1,2,-2z"
-        android:fillColor="#FFF472B6" />
+        android:fillColor="#FFFF4D6D" />
 </vector>
