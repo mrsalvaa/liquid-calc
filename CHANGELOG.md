@@ -4,6 +4,11 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
+## Unreleased
+
+### Changed
+- Landscape redesigned: a short strip at the top with the numbers and the buttons, and the keys below across the whole width. The scientific keys sit in an even grid lined up with the number pad, and on short keys the second function goes next to the main one instead of above it.
+
 ## 0.4.1
 
 ### Changed

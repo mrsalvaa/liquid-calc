@@ -4,6 +4,11 @@
 
 [English](CHANGELOG.md) | **Español**
 
+## Sin publicar
+
+### Cambios
+- Horizontal rediseñado: arriba una franja baja con los números y los botones, y abajo las teclas a todo lo ancho. Las científicas van en una grilla pareja alineada con el teclado numérico, y en las teclas bajas la segunda función va al lado de la principal en vez de arriba.
+
 ## 0.4.1
 
 ### Cambios

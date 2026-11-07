@@ -208,6 +208,7 @@ private fun Calculator(settings: AppSettings, separator: Char, onHistory: () -> 
             .onPreviewKeyEvent { handleHardwareKey(it, angle, copy, paste, onHistory, toggleAngle) },
     ) {
         val landscape = maxWidth > maxHeight
+        val band = maxHeight * 0.27f
         val basic = basicKeys(angle, separator)
         val scientific = scientificKeys(withValue)
         val memory = memoryKeys(withValue)
@@ -218,14 +219,31 @@ private fun Calculator(settings: AppSettings, separator: Char, onHistory: () -> 
         val display = @Composable { m: Modifier -> CalcDisplay(angle, separator, onCopy = copy, modifier = m) }
 
         if (landscape) {
-            Row(Modifier.fillMaxSize()) {
-                Column(Modifier.weight(0.9f).fillMaxHeight()) {
-                    topBar()
-                    display(Modifier.weight(1f).padding(4.dp))
-                    if (!settings.scientific) KeyGrid(listOf(memory), Modifier.height(56.dp))
+            // En horizontal, las teclas científicas (de filas con distinta cantidad) se reparten en
+            // una grilla pareja con tantas filas como el teclado numérico, así quedan alineadas y
+            // todas del mismo tamaño.
+            val scientificGrid = remember(scientific, basic.size) {
+                val keys = scientific.flatten()
+                val columns = (keys.size + basic.size - 1) / basic.size
+                keys.chunked(columns)
+            }
+            // Arriba, una franja baja con los números y los botones; abajo, las teclas a todo lo
+            // ancho. Sin la científica, la memoria va en una columna al lado del teclado.
+            Column(Modifier.fillMaxSize()) {
+                Row(Modifier.fillMaxWidth().height(band), verticalAlignment = Alignment.CenterVertically) {
+                    display(Modifier.weight(1f).fillMaxHeight().padding(4.dp))
+                    Spacer(Modifier.width(8.dp))
+                    TopBar(settings, onAngle = toggleAngle, onHistory = onHistory, onSettings = onSettings, compact = true)
                 }
-                if (settings.scientific) KeyGrid(scientific, Modifier.weight(1.1f).fillMaxHeight())
-                KeyGrid(basic, Modifier.weight(1f).fillMaxHeight())
+                Spacer(Modifier.height(4.dp))
+                Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (settings.scientific) {
+                        KeyGrid(scientificGrid, Modifier.weight(0.75f).fillMaxHeight(), uniform = true)
+                    } else {
+                        KeyGrid(memory.map { listOf(it) }, Modifier.weight(0.23f).fillMaxHeight(), uniform = true)
+                    }
+                    KeyGrid(basic, Modifier.weight(1f).fillMaxHeight())
+                }
             }
         } else {
             Column(Modifier.fillMaxSize()) {
@@ -243,13 +261,14 @@ private fun Calculator(settings: AppSettings, separator: Char, onHistory: () -> 
 }
 
 @Composable
-private fun TopBar(settings: AppSettings, onAngle: () -> Unit, onHistory: () -> Unit, onSettings: () -> Unit) {
+private fun TopBar(settings: AppSettings, onAngle: () -> Unit, onHistory: () -> Unit, onSettings: () -> Unit, compact: Boolean = false) {
+    // compact: solo los botones, uno al lado del otro (en horizontal van al lado de los números).
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
+        (if (compact) Modifier else Modifier.fillMaxWidth()).padding(horizontal = 4.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (settings.scientific) AngleToggle(settings.angle, onAngle)
-        Spacer(Modifier.weight(1f))
+        if (compact) Spacer(Modifier.width(10.dp)) else Spacer(Modifier.weight(1f))
         GlassIconButton(
             Icons.Rounded.Functions,
             stringResource(R.string.scientific),

@@ -72,11 +72,12 @@ const val HOLD_MS = 400L
 
 /** Teclas en filas iguales que ocupan todo el lugar disponible. */
 @Composable
-fun KeyGrid(rows: List<List<CalcKey>>, modifier: Modifier = Modifier) {
+fun KeyGrid(rows: List<List<CalcKey>>, modifier: Modifier = Modifier, uniform: Boolean = false) {
     Column(modifier) {
         rows.forEach { row ->
             Row(Modifier.weight(1f).fillMaxWidth()) {
-                row.forEach { key -> KeyButton(key, Modifier.weight(key.weight).fillMaxHeight()) }
+                // uniform: todas del mismo ancho, sin el ancho propio de cada tecla.
+                row.forEach { key -> KeyButton(key, Modifier.weight(if (uniform) 1f else key.weight).fillMaxHeight()) }
             }
         }
     }
@@ -160,9 +161,23 @@ private fun currentEventUptime(start: Long): Long = android.os.SystemClock.uptim
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.KeyLabel(key: CalcKey, color: androidx.compose.ui.graphics.Color) {
     val p = LocalGlass.current
-    val shifted = key.shiftLabel != null
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+    // Tecla baja (en horizontal): la segunda función va a la izquierda, en la misma línea.
+    val side = key.shiftLabel != null && maxHeight < 64.dp
+    val shifted = key.shiftLabel != null && !side
+    if (side) {
+        androidx.compose.foundation.layout.Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
+            val shiftStyle = TextStyle(color = p.accentFg, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+            if (key.math) MathText(key.shiftLabel!!, shiftStyle, Modifier, boxes = true)
+            else Text(key.shiftLabel!!, color = p.accentFg, fontSize = 11.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+            androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp))
+            if (key.math) MathText(key.label, TextStyle(color = color, fontSize = 15.sp, fontWeight = FontWeight.Medium), Modifier, boxes = true)
+            else Text(key.label, color = color, fontSize = 17.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+        }
+        return@BoxWithConstraints
+    }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (key.shiftLabel != null) {
+        if (shifted) {
             // Separada del borde de arriba: la píldora es redonda y ahí se angosta.
             val top = Modifier.align(Alignment.TopCenter).padding(top = 9.dp)
             if (key.math) {
@@ -199,5 +214,6 @@ private fun androidx.compose.foundation.layout.BoxScope.KeyLabel(key: CalcKey, c
                 maxLines = 1,
             )
         }
+    }
     }
 }
