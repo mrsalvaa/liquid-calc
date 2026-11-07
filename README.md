@@ -56,11 +56,11 @@ Get the APK from [Releases](../../releases) and install it (Android 12 or later)
 Check that the file hasn't been tampered with:
 
 ```bash
-sha256sum -c liquid-calc-v0.4.1.apk.sha256
+sha256sum -c liquid-calc-v0.5.0.apk.sha256
 ```
 
 ```
-33f716d7c6b39888b0690b570b03069a91bfa6dbb9d62d07bba543c6402b2b67  liquid-calc-v0.4.1.apk
+c6333ef8fd8bf92a13d934945407c460c2636438591e96aa3e8658625fbdb4a5  liquid-calc-v0.5.0.apk
 ```
 
 And that it's signed with the project key (SHA-256 certificate fingerprint):
@@ -70,7 +70,7 @@ And that it's signed with the project key (SHA-256 certificate fingerprint):
 ```
 
 ```bash
-apksigner verify --print-certs liquid-calc-v0.4.1.apk
+apksigner verify --print-certs liquid-calc-v0.5.0.apk
 ```
 
 ## Building
