@@ -4,6 +4,24 @@
 
 **English** | [Español](CHANGELOG.es.md)
 
+## 0.4.0
+
+### New
+- Scientific keypad with a Casio layout: hold a key for its second function. New: fraction,
+  n-th root, 10ˣ and x³. Digits stay as in basic mode;
+  parentheses and % aren't repeated.
+- Natural display: small raised exponents, stacked fractions and roots with a bar.
+- Tap the calculation to move the cursor and edit anywhere; tap empty space to jump to the end.
+- Thousands separator: 27,000.3 (depends on the language).
+- Clearing everything makes the calculation float up and fade.
+
+### Changed
+- Holding "delete" clears everything in 0.4 s.
+- Keys respond across their whole area, edges included.
+- ( ) closes an open parenthesis after anything that can end one, not only a number.
+- Glass is drawn the same as in Calendar, Contacts and Phone: refraction and blur on every
+  surface and no background pause on touch.
+
 ## 0.3.2
 
 ### Changed

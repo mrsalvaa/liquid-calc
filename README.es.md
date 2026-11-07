@@ -20,8 +20,15 @@ y el historial se puede borrar o desactivar en Ajustes.
 
 ## Funciones
 
-- **Básica y científica**: sin, cos, tan y sus inversas (en grados o radianes), ln, log, eˣ,
-  potencias, raíz cuadrada y cúbica, factorial, valor absoluto, 1/x, π y e.
+- **Básica y científica**: sin, cos, tan y sus inversas (en grados o radianes), ln, log, 10ˣ,
+  eˣ, fracciones, potencias, raíz cuadrada, cúbica y n-ésima, factorial, valor absoluto, x⁻¹, π
+  y e. El bloque científico sigue la distribución de una Casio: la segunda función de cada tecla
+  (lo que en la Casio sale con SHIFT) se ve chica arriba y se usa manteniéndola apretada.
+- **Escritura natural**: la pantalla muestra la cuenta como en una calculadora científica: x³
+  con el exponente arriba y más chico, fracciones apiladas, raíces con la barra encima. Tocar la
+  cuenta pone el cursor ahí para corregirla, incluso después de "="; tocar lo vacío lo lleva al
+  final.
+- Números con el separador de miles y el decimal del idioma: 27.000,3 en español.
 - **Aritmética decimal exacta**: 0,1 + 0,2 da 0,3. Todo se calcula con 34 cifras (decimal128) y se
   muestran 15, así no aparecen errores de redondeo.
 - **Parser propio**: la expresión se interpreta con un parser hecho para la calculadora; nunca se
@@ -33,9 +40,10 @@ y el historial se puede borrar o desactivar en Ajustes.
 - **Historial** local: tocar una cuenta la vuelve a poner en pantalla. Se borra entero o se
   desactiva (y se borra) desde Ajustes.
 - Copiar el resultado: manteniendo apretado el número aparece "Copiar".
-- Mantener apretado "borrar" borra todo.
+- Mantener apretado "borrar" 0,4 s borra todo (aunque se suelte enseguida) y la cuenta se va
+  hacia arriba. Las teclas responden en toda su superficie, también en el borde.
 - **Teclado físico**: números y `+ - * / ^ % ! ( )`; Enter o `=` calcula, Retroceso borra,
-  Esc o Supr limpia. Letras: `s` sin, `c` cos, `t` tan, `l` ln, `g` log, `r` √, `p` π,
+  Esc o Supr limpia, las flechas mueven el cursor. Letras: `s` sin, `c` cos, `t` tan, `l` ln, `g` log, `r` √, `p` π,
   `e`, `a` ANS. Ctrl+C copia, Ctrl+V pega, Ctrl+H abre el historial y Ctrl+D cambia entre
   grados y radianes.
 - Vertical y horizontal: en horizontal, las teclas científicas van al lado de las básicas.

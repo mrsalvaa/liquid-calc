@@ -4,12 +4,16 @@ package dev.liquidcalc.ui
 import android.content.ClipData
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -96,7 +100,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import dev.liquidcalc.ui.glass.LocalLiteGlass
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.TransformOrigin
@@ -112,7 +115,10 @@ fun CalcScreen(settings: AppSettings) {
     val reduced = LocalReducedMotion.current
 
     // Separador decimal del idioma del teléfono (coma en español, punto en inglés).
-    val separator = DecimalFormatSymbols.getInstance(LocalConfiguration.current.locales[0]).decimalSeparator
+    val symbols = DecimalFormatSymbols.getInstance(LocalConfiguration.current.locales[0])
+    val separator = symbols.decimalSeparator
+    // Separador de miles: el del idioma (27.000,3 en español, 27,000.3 en inglés).
+    val grouping = symbols.groupingSeparator.takeIf { it != separator } ?: if (separator == ',') '.' else ','
     LaunchedEffect(separator) {
         val e = Session.editor
         if (e.separator != separator) {
@@ -125,6 +131,7 @@ fun CalcScreen(settings: AppSettings) {
     CompositionLocalProvider(
         LocalToast provides { toast = it to System.nanoTime() },
         LocalDialog provides { dialog = it },
+        LocalGrouping provides grouping,
     ) {
         GlassRoot(
             // Con el historial abierto el fondo queda tapado: animarlo no se ve y hace que el
@@ -145,20 +152,15 @@ fun CalcScreen(settings: AppSettings) {
                 transitionSpec = { fadeIn(tween(if (reduced) 0 else 200)) togetherWith fadeOut(tween(if (reduced) 0 else 120)) },
                 label = "screen",
             ) { settingsOpen ->
-                // Superficies livianas en todo el contenido (unas 45 en la calculadora, tarjetas
-                // que se deslizan en Ajustes): sin refracción va fluido aun con el fondo en
-                // movimiento (ver LocalLiteGlass). El historial flota aparte y sí refracta.
-                CompositionLocalProvider(LocalLiteGlass provides true) {
-                    if (settingsOpen) {
-                        SettingsScreen(settings, onBack = { showSettings = false })
-                    } else {
-                        Calculator(
-                            settings,
-                            separator,
-                            onHistory = { showHistory = !showHistory },
-                            onSettings = { showSettings = true; showHistory = false },
-                        )
-                    }
+                if (settingsOpen) {
+                    SettingsScreen(settings, onBack = { showSettings = false })
+                } else {
+                    Calculator(
+                        settings,
+                        separator,
+                        onHistory = { showHistory = !showHistory },
+                        onSettings = { showSettings = true; showHistory = false },
+                    )
                 }
             }
         }
@@ -207,7 +209,7 @@ private fun Calculator(settings: AppSettings, separator: Char, onHistory: () -> 
     ) {
         val landscape = maxWidth > maxHeight
         val basic = basicKeys(angle, separator)
-        val scientific = scientificKeys(angle)
+        val scientific = scientificKeys(withValue)
         val memory = memoryKeys(withValue)
 
         val topBar = @Composable {
@@ -220,7 +222,7 @@ private fun Calculator(settings: AppSettings, separator: Char, onHistory: () -> 
                 Column(Modifier.weight(0.9f).fillMaxHeight()) {
                     topBar()
                     display(Modifier.weight(1f).padding(4.dp))
-                    KeyGrid(listOf(memory), Modifier.height(56.dp))
+                    if (!settings.scientific) KeyGrid(listOf(memory), Modifier.height(56.dp))
                 }
                 if (settings.scientific) KeyGrid(scientific, Modifier.weight(1.1f).fillMaxHeight())
                 KeyGrid(basic, Modifier.weight(1f).fillMaxHeight())
@@ -228,9 +230,12 @@ private fun Calculator(settings: AppSettings, separator: Char, onHistory: () -> 
         } else {
             Column(Modifier.fillMaxSize()) {
                 topBar()
-                display(Modifier.weight(if (settings.scientific) 0.8f else 1f).padding(4.dp))
-                KeyGrid(listOf(memory), Modifier.height(56.dp))
-                if (settings.scientific) KeyGrid(scientific, Modifier.weight(1.1f))
+                display(Modifier.weight(if (settings.scientific) 0.85f else 1f).padding(4.dp))
+                if (settings.scientific) {
+                    KeyGrid(scientific, Modifier.weight(1.05f))
+                } else {
+                    KeyGrid(listOf(memory), Modifier.height(56.dp))
+                }
                 KeyGrid(basic, Modifier.weight(if (settings.scientific) 1.5f else 1.9f))
             }
         }
@@ -299,30 +304,31 @@ private fun CalcDisplay(angle: AngleUnit, separator: Char, onCopy: () -> Unit, m
     val editor = Session.editor
     val error = Session.error
     val value = Session.currentValue(angle)
-    val result = value?.let { pretty(Format.display(it, separator)) }
-    val expression = editor.expression.ifEmpty { "0" }
+    val grouping = LocalGrouping.current
+    val result = value?.let { pretty(Format.display(it, separator), grouping) }
+    val expression = editor.expression
     val resultSpoken = result?.let { stringResource(R.string.result_cd, it) }
-    val expressionSpoken = stringResource(R.string.expression_cd, editor.expression)
+    val expressionSpoken = stringResource(R.string.expression_cd, spokenExpression(editor.expression))
+    val onTap: (Int) -> Unit = { i -> Session.edit { it.moveTo(i) } }
 
-    // "Pop" al borrar todo: el contenido arranca un poco más chico desde la esquina del número y
-    // vuelve a su tamaño con un rebote suave (sin animación si el sistema pide quitarlas).
+    // Al borrar todo (mantener "borrar"), lo que había sube apenas y se desvanece, rápido. Ya está
+    // borrado: la animación es solo de salida (sin ella si el sistema pide quitar animaciones).
     val reduced = LocalReducedMotion.current
-    // Se crea ya achicado en el mismo cuadro en que se borra (si no, el "0" se vería un cuadro
-    // a tamaño completo antes de achicarse).
     val clears = Session.clears
-    val pop = remember(clears) { Animatable(if (clears > 0 && !reduced) 0.85f else 1f) }
-    LaunchedEffect(pop) {
-        pop.animateTo(1f, spring(dampingRatio = 0.45f, stiffness = 500f))
-    }
+    val leaving = remember(clears) { Animatable(if (clears > 0 && !reduced) 0f else 1f) }
+    LaunchedEffect(leaving) { leaving.animateTo(1f, tween(90, easing = FastOutSlowInEasing)) }
 
     GlassSurface(modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), frost = 14.dp) {
         Column(
             Modifier
                 .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = pop.value
-                    scaleY = pop.value
-                    transformOrigin = TransformOrigin(1f, 1f)
+                // Tocar fuera de la cuenta (en lo vacío) lleva el cursor al final: así se sale
+                // de un exponente o de una fracción para seguir escribiendo.
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        val e = Session.editor
+                        if (!e.evaluated) Session.edit { it.moveTo(e.expression.length) }
+                    }
                 }
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.End,
@@ -330,7 +336,7 @@ private fun CalcDisplay(angle: AngleUnit, separator: Char, onCopy: () -> Unit, m
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (Session.memory.isSet) {
-                    val mem = pretty(Format.display(Session.memory.recall(), separator))
+                    val mem = pretty(Format.display(Session.memory.recall(), separator), grouping)
                     val spoken = stringResource(R.string.memory_value, mem)
                     Row(Modifier.semantics(mergeDescendants = true) { contentDescription = spoken }) {
                         Text("M", color = p.accentFg, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
@@ -340,23 +346,49 @@ private fun CalcDisplay(angle: AngleUnit, separator: Char, onCopy: () -> Unit, m
             }
             Spacer(Modifier.weight(1f))
             if (editor.evaluated) {
-                Text(
-                    "${editor.expression} =",
-                    Modifier.semantics { contentDescription = expressionSpoken },
-                    color = p.contentSecondary,
-                    fontSize = 20.sp,
-                    maxLines = 2,
-                    textAlign = TextAlign.End,
+                // Tocar la cuenta vuelve a editarla, con el cursor donde se tocó.
+                FitMathText(
+                    "$expression =",
+                    TextStyle(color = p.contentSecondary),
+                    maxSize = 22.sp,
+                    minSize = 14.sp,
+                    modifier = Modifier.semantics { contentDescription = expressionSpoken },
+                    onTap = { i -> onTap(i.coerceAtMost(expression.length)) },
                 )
                 ResultText(result ?: "", resultSpoken, big = true, onCopy)
             } else {
-                BasicText(
-                    expression,
-                    Modifier.semantics { contentDescription = expressionSpoken },
-                    style = TextStyle(color = p.content, fontWeight = FontWeight.Light, textAlign = TextAlign.End),
-                    maxLines = 3,
-                    autoSize = TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = 56.sp),
-                )
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    FitMathText(
+                        expression,
+                        TextStyle(color = p.content, fontWeight = FontWeight.Light),
+                        maxSize = 56.sp,
+                        minSize = 26.sp,
+                        modifier = Modifier.semantics { contentDescription = expressionSpoken },
+                        cursor = editor.cursor,
+                        onTap = onTap,
+                        maxHeightFraction = 0.6f,
+                    )
+                    val gone = Session.cleared
+                    if (leaving.value < 1f && gone.isNotEmpty()) {
+                        FitMathText(
+                            gone,
+                            TextStyle(color = p.content, fontWeight = FontWeight.Light),
+                            maxSize = 56.sp,
+                            minSize = 26.sp,
+                            modifier = Modifier
+                                .clearAndSetSemantics {}
+                                .graphicsLayer {
+                                    val t = leaving.value
+                                    alpha = 1f - t
+                                    translationY = -t * 16.dp.toPx()
+                                    scaleX = 1f - 0.3f * t
+                                    scaleY = 1f - 0.3f * t
+                                    transformOrigin = TransformOrigin(1f, 1f)
+                                },
+                            maxHeightFraction = 0.6f,
+                        )
+                    }
+                }
                 when {
                     error != null -> Text(
                         errorText(error),
@@ -462,21 +494,48 @@ private val SUPERSCRIPT = mapOf(
     '0' to '⁰', '1' to '¹', '2' to '²', '3' to '³', '4' to '⁴', '5' to '⁵', '6' to '⁶', '7' to '⁷', '8' to '⁸', '9' to '⁹', '-' to '⁻',
 )
 
-/** "1,5×10^-7" → "1,5×10⁻⁷" y el menos de verdad (−) en vez del guion. */
-fun pretty(text: String): String {
+/**
+ * "1,5×10^-7" → "1,5×10⁻⁷", el menos de verdad (−) en vez del guion y la parte entera con
+ * [grouping] cada tres cifras: "27000,3" → "27.000,3".
+ */
+fun pretty(text: String, grouping: Char): String {
     val i = text.indexOf("×10^")
-    val base = if (i < 0) text else text.substring(0, i) + "×10" + text.substring(i + 4).map { SUPERSCRIPT[it] ?: it }.joinToString("")
-    return if (base.startsWith("-")) "−" + base.substring(1) else base
+    val mantissa = if (i < 0) text else text.substring(0, i)
+    val power = if (i < 0) "" else "×10" + text.substring(i + 4).map { SUPERSCRIPT[it] ?: it }.joinToString("")
+    val negative = mantissa.startsWith("-")
+    val digits = mantissa.removePrefix("-")
+    val intLength = digits.indexOfFirst { !it.isDigit() }.let { if (it < 0) digits.length else it }
+    val grouped = buildString {
+        digits.forEachIndexed { k, c ->
+            if (k in 1 until intLength && (intLength - k) % 3 == 0) append(grouping)
+            append(c)
+        }
+    }
+    return (if (negative) "−" else "") + grouped + power
 }
+
+/** La expresión para TalkBack, sin las marcas internas: x² se lee "x ^ (2)". */
+private fun spokenExpression(text: String): String = Editor.toEngine(text)
 
 // --- Teclas ---------------------------------------------------------------------------------
 
+/** Números y operaciones: los mismos en la básica y en la científica. */
 private fun basicKeys(angle: AngleUnit, separator: Char): List<List<CalcKey>> {
     fun digit(d: Char) = CalcKey(d.toString(), null, KeyKind.DIGIT) { Session.edit { it.digit(d) } }
     fun op(label: Char, spoken: Int) = CalcKey(label.toString(), spoken, KeyKind.OPERATOR) { Session.edit { it.operator(label) } }
+    val clear = CalcKey("AC", R.string.key_clear, KeyKind.CLEAR) { Session.edit { it.clear() } }
+    val decimal = CalcKey(separator.toString(), R.string.key_decimal, KeyKind.DIGIT) { Session.edit { it.decimal() } }
+    val backspace = CalcKey(
+        "",
+        R.string.key_backspace,
+        KeyKind.CLEAR,
+        Icons.AutoMirrored.Rounded.Backspace,
+        holdLabel = R.string.key_clear,
+        onHold = { Session.clearAll() },
+    ) { Session.backspace() }
     return listOf(
         listOf(
-            CalcKey("AC", R.string.key_clear, KeyKind.CLEAR) { Session.edit { it.clear() } },
+            clear,
             CalcKey("( )", R.string.key_parens, KeyKind.OPERATOR) { Session.edit { it.parenthesis() } },
             CalcKey("%", R.string.key_percent, KeyKind.OPERATOR) { Session.edit { it.postfix('%') } },
             op('÷', R.string.key_divide),
@@ -484,40 +543,66 @@ private fun basicKeys(angle: AngleUnit, separator: Char): List<List<CalcKey>> {
         listOf(digit('7'), digit('8'), digit('9'), op('×', R.string.key_times)),
         listOf(digit('4'), digit('5'), digit('6'), op('−', R.string.key_minus)),
         listOf(digit('1'), digit('2'), digit('3'), op('+', R.string.key_plus)),
-        listOf(
-            digit('0'),
-            CalcKey(separator.toString(), R.string.key_decimal, KeyKind.DIGIT) { Session.edit { it.decimal() } },
-            CalcKey(
-                "",
-                R.string.key_backspace,
-                KeyKind.CLEAR,
-                Icons.AutoMirrored.Rounded.Backspace,
-                holdLabel = R.string.key_clear,
-                onHold = { Session.clearAll() },
-            ) { Session.edit { it.backspace() } },
-            CalcKey("=", R.string.key_equals, KeyKind.EQUALS) { Session.equals(angle) },
-        ),
+        listOf(digit('0'), decimal, backspace, CalcKey("=", R.string.key_equals, KeyKind.EQUALS) { Session.equals(angle) }),
     )
 }
 
-private fun scientificKeys(angle: AngleUnit): List<List<CalcKey>> {
-    fun fn(label: String, text: String, spoken: Int) = CalcKey(label, spoken, KeyKind.FUNCTION) { Session.edit { it.operand(text) } }
-    fun pow(label: String, suffix: String, spoken: Int) = CalcKey(label, spoken, KeyKind.FUNCTION) { Session.edit { it.power(suffix) } }
+/**
+ * El bloque científico, como el de una Casio: cada tecla tiene su segunda función arriba (lo
+ * amarillo del SHIFT), que se usa manteniéndola apretada.
+ */
+private fun scientificKeys(withValue: ((BigDecimal) -> Unit) -> Unit): List<List<CalcKey>> {
+    fun key(
+        label: String,
+        spoken: Int,
+        shift: String?,
+        shiftSpoken: Int?,
+        onShift: ((Editor) -> Editor)?,
+        math: Boolean = false,
+        onTap: (Editor) -> Editor,
+    ) = CalcKey(
+        label,
+        spoken,
+        KeyKind.FUNCTION,
+        holdLabel = shiftSpoken,
+        shiftLabel = shift,
+        math = math,
+        onHold = onShift?.let { f -> { Session.edit(f) } },
+    ) { Session.edit(onTap) }
+    // Etiquetas en escritura natural, con casillas vacías: □/□ apilada, √□, ⁿ√□, ∛□, x^□.
+    val frac = "${Editor.FRAC}${Editor.SEP}${Editor.END}"
+    val sqrt = "${Editor.SQRT}${Editor.END}"
+    val root = "${Editor.ROOT}${Editor.SEP}${Editor.END}"
+    val cbrt = "${Editor.ROOT}3${Editor.SEP}${Editor.END}"
+    val pow = "x${Editor.POW}${Editor.END}"
     return listOf(
-        listOf(fn("sin", "sin(", R.string.key_sin), fn("cos", "cos(", R.string.key_cos), fn("tan", "tan(", R.string.key_tan), fn("π", "π", R.string.key_pi), fn("e", "e", R.string.key_e)),
         listOf(
-            fn("sin⁻¹", "asin(", R.string.key_asin), fn("cos⁻¹", "acos(", R.string.key_acos), fn("tan⁻¹", "atan(", R.string.key_atan),
-            CalcKey("(", R.string.key_open, KeyKind.FUNCTION) { Session.edit { it.open() } },
-            CalcKey(")", R.string.key_close, KeyKind.FUNCTION) { Session.edit { it.close() } },
+            key(frac, R.string.key_fraction, root, R.string.key_root, { it.root() }, math = true) { it.fraction() },
+            key(sqrt, R.string.key_sqrt, cbrt, R.string.key_cbrt, { it.cbrt() }, math = true) { it.sqrt() },
+            key("x²", R.string.key_square, "x³", R.string.key_cube, { it.power("3") }) { it.power("2") },
+            key("log", R.string.key_log, "10ˣ", R.string.key_ten_power, { it.base("10") }) { it.operand("log(") },
+            key("ln", R.string.key_ln, "eˣ", R.string.key_exp, { it.base("e") }) { it.operand("ln(") },
+            key("x⁻¹", R.string.key_inverse, "x!", R.string.key_factorial, { it.postfix('!') }) { it.power("−1") },
         ),
         listOf(
-            fn("ln", "ln(", R.string.key_ln), fn("log", "log(", R.string.key_log), fn("√", "√", R.string.key_sqrt), fn("∛", "∛", R.string.key_cbrt),
-            CalcKey("xʸ", R.string.key_power, KeyKind.FUNCTION) { Session.edit { it.operator('^') } },
+            key("sin", R.string.key_sin, "sin⁻¹", R.string.key_asin, { it.operand("asin(") }) { it.operand("sin(") },
+            key("cos", R.string.key_cos, "cos⁻¹", R.string.key_acos, { it.operand("acos(") }) { it.operand("cos(") },
+            key("tan", R.string.key_tan, "tan⁻¹", R.string.key_atan, { it.operand("atan(") }) { it.operand("tan(") },
+            key(pow, R.string.key_power, "|x|", R.string.key_abs, { it.abs() }, math = true) { it.power() },
+            key("π", R.string.key_pi, "e", R.string.key_e, { it.operand("e") }) { it.operand("π") },
+            key("Ans", R.string.key_ans, null, null, null) { it.operand(Editor.ANS) },
         ),
         listOf(
-            pow("x²", "^2", R.string.key_square),
-            CalcKey("x!", R.string.key_factorial, KeyKind.FUNCTION) { Session.edit { it.postfix('!') } },
-            fn("eˣ", "exp(", R.string.key_exp), fn("|x|", "abs(", R.string.key_abs), pow("1/x", "^(−1)", R.string.key_inverse),
+            CalcKey("MC", R.string.key_mc, KeyKind.FUNCTION) { Session.memoryClear() },
+            CalcKey("MR", R.string.key_mr, KeyKind.FUNCTION) { Session.memoryRecall() },
+            CalcKey(
+                "M+",
+                R.string.key_m_plus,
+                KeyKind.FUNCTION,
+                holdLabel = R.string.key_m_minus,
+                shiftLabel = "M−",
+                onHold = { withValue { Session.memoryMinus(it) } },
+            ) { withValue { Session.memoryPlus(it) } },
         ),
     )
 }

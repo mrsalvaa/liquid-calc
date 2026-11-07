@@ -37,6 +37,10 @@
     <string name="key_mr">recuperar memoria</string>
     <string name="key_m_plus">sumar a la memoria</string>
     <string name="key_m_minus">restar de la memoria</string>
+    <string name="key_fraction">fracción</string>
+    <string name="key_root">raíz enésima</string>
+    <string name="key_cube">al cubo</string>
+    <string name="key_ten_power">diez elevado a</string>
     <string name="memory_value">Memoria: %s</string>
     <string name="nothing_to_save">Todavía no hay un resultado</string>
     <string name="degrees">Grados</string>

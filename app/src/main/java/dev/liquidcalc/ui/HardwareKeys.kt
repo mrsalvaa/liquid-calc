@@ -39,7 +39,9 @@ fun handleHardwareKey(
     }
     when (event.key) {
         Key.Enter, Key.NumPadEnter -> { Session.equals(angle); return true }
-        Key.Backspace -> { Session.edit { it.backspace() }; return true }
+        Key.Backspace -> { Session.backspace(); return true }
+        Key.DirectionLeft -> { Session.edit { it.left() }; return true }
+        Key.DirectionRight -> { Session.edit { it.right() }; return true }
         Key.Escape, Key.Delete -> { Session.edit { it.clear() }; return true }
         else -> Unit
     }
@@ -51,7 +53,7 @@ fun handleHardwareKey(
         '-', '−' -> { e -> e.operator(Editor.MINUS) }
         '*', 'x', '×' -> { e -> e.operator('×') }
         '/', '÷' -> { e -> e.operator('÷') }
-        '^' -> { e -> e.operator('^') }
+        '^' -> { e -> e.power() }
         '%', '!' -> { e -> e.postfix(c) }
         '(' -> { e -> e.open() }
         ')' -> { e -> e.close() }
@@ -60,7 +62,7 @@ fun handleHardwareKey(
         't' -> { e -> e.operand("tan(") }
         'l' -> { e -> e.operand("ln(") }
         'g' -> { e -> e.operand("log(") }
-        'r' -> { e -> e.operand("√") }
+        'r' -> { e -> e.sqrt() }
         'p' -> { e -> e.operand("π") }
         'e' -> { e -> e.operand("e") }
         'a' -> { e -> e.operand(Editor.ANS) }

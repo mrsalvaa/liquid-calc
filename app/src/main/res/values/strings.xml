@@ -37,6 +37,10 @@
     <string name="key_mr">recall memory</string>
     <string name="key_m_plus">add to memory</string>
     <string name="key_m_minus">subtract from memory</string>
+    <string name="key_fraction">fraction</string>
+    <string name="key_root">n-th root</string>
+    <string name="key_cube">cubed</string>
+    <string name="key_ten_power">ten to the power of</string>
     <string name="memory_value">Memory: %s</string>
     <string name="nothing_to_save">There\'s no result yet</string>
     <string name="degrees">Degrees</string>

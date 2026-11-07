@@ -12,6 +12,8 @@ internal sealed interface Node {
     data class Negate(val operand: Node) : Node
     data class Binary(val op: Op, val left: Node, val right: Node) : Node
     data class Call(val function: Function, val argument: Node) : Node
+    /** Raíz [index]-ésima: root(n;x). */
+    data class Root(val index: Node, val radicand: Node) : Node
     data class Factorial(val operand: Node) : Node
     /** "x%": vale x/100, salvo a la derecha de + o −, donde es un porcentaje de lo de la izquierda. */
     data class Percent(val operand: Node) : Node
@@ -28,7 +30,7 @@ internal sealed interface Node {
  *     power    = postfix ("^" signed)?                                  a la derecha: 2^3^2 = 2^9
  *     postfix  = prefix ("!" | "%")*
  *     prefix   = ("√" | "∛") ("−" | "+")* prefix | primary
- *     primary  = número | π | e | ans | función "(" sum ")" | "(" sum ")"
+ *     primary  = número | π | e | ans | función "(" sum ")" | root "(" sum ";" sum ")" | "(" sum ")"
  *
  * Así −2^2 = −4 (como en matemática) y 2^−1 = 0,5. Los paréntesis que faltan al final se cierran
  * solos, como en cualquier calculadora: "sin(30" vale lo mismo que "sin(30)".
@@ -127,10 +129,19 @@ internal class Parser(private val tokens: List<Token>) {
             TokenKind.FUNCTION -> {
                 if (current.kind != TokenKind.LPAREN) fail(CalcError.Syntax(current.position))
                 index++
-                Node.Call(token.function!!, group())
+                if (token.function == Function.ROOT) root() else Node.Call(token.function!!, group())
             }
             else -> fail(CalcError.Syntax(token.position))
         }
+    }
+
+    /** root(n;x), con el "(" ya leído; el ")" final puede faltar. */
+    private fun root(): Node {
+        if (current.kind == TokenKind.SEMICOLON || current.kind == TokenKind.END) fail(CalcError.Syntax(current.position))
+        val index = sum()
+        if (current.kind != TokenKind.SEMICOLON) fail(CalcError.Syntax(current.position))
+        this.index++
+        return Node.Root(index, group())
     }
 
     /** Lo de adentro de un paréntesis ya abierto; el cierre puede faltar al final. */

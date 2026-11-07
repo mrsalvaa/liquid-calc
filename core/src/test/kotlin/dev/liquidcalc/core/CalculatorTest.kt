@@ -177,6 +177,19 @@ class CalculatorTest {
         assertEquals("0.001", show("10^-3"))
     }
 
+    @Test fun nthRoot() {
+        assertEquals("2", show("root(5;32)"))
+        assertEquals("-2", show("root(5;-32)"))
+        assertEquals("3", show("root(4;81)"))
+        assertEquals("12", show("root(2;144)"))
+        assertEquals("3", show("root(3;27)"))
+        assertEquals("2", show("root(3;8"))
+        assertEquals("4", show("2root(3;8)"))
+        assertEquals(CalcError.Domain, error("root(4;-16)"))
+        assertEquals(CalcError.Domain, error("root(0;5)"))
+        assertIs<CalcError.Syntax>(error("root(3)"))
+    }
+
     @Test fun factorial() {
         assertEquals("1", show("0!"))
         assertEquals("120", show("5!"))

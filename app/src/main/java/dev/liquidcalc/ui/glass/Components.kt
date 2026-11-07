@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package dev.liquidcalc.ui.glass
 
-import android.graphics.BlurMaskFilter
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -30,7 +27,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -40,35 +36,51 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import kotlin.math.abs
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.graphics.asAndroidPath
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import android.graphics.BlurMaskFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import kotlin.math.roundToInt
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
@@ -76,24 +88,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.Shadow
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import androidx.compose.runtime.getValue
 
 /**
  * Superficie de "cristal líquido" al estilo de Apple: refracta lo que tiene detrás como una lente
@@ -114,12 +114,17 @@ fun GlassSurface(
     shadowRadius: Dp = 20.dp,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    /**
+     * Para quien maneja el toque por su cuenta (las teclas de Calc, que lo toman en toda la
+     * celda): sus Press/Release deforman la superficie como si se la tocara.
+     */
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val p = LocalGlass.current
     val backdrop = LocalBackdrop.current
     val haptics = LocalHapticFeedback.current
-    val interaction = remember { MutableInteractionSource() }
+    val interaction = interactionSource ?: remember { MutableInteractionSource() }
     // Sin la deformación de gota si el sistema pide quitar animaciones.
     val pressed = interaction.collectIsPressedAsState().value && !LocalReducedMotion.current
     val squish = spring<Float>(dampingRatio = 0.42f, stiffness = 520f)
@@ -152,18 +157,14 @@ fun GlassSurface(
     // Fondo liso o de énfasis (un brillo quieto y muy suave): refractarlo o desenfocarlo da lo
     // mismo que no hacerlo, así que las superficies del contenido se dibujan sin efectos (mucho
     // menos trabajo para la GPU) con el mismo aspecto. Lo que flota encima sí refracta, porque
-    // debajo pasa el contenido. "En movimiento" conserva todos los efectos, salvo donde la app
-    // pide superficies livianas (LocalLiteGlass).
-    val lite = LocalLiteGlass.current
-    if (lite || ((p.blobs.isEmpty() || p.accentGlow) && !LocalFloating.current)) {
+    // debajo pasa el contenido. "En movimiento" conserva todos los efectos.
+    if ((p.blobs.isEmpty() || p.accentGlow) && !LocalFloating.current) {
         Box(
             modifier
                 .graphicsLayer {
                     scaleX = sx
                     scaleY = sy
-                    // Las livianas, sin sombra de elevación en oscuro: sobre un fondo casi negro no
-                    // se ve, y con decenas de superficies es lo que más tarda en dibujarse.
-                    if (p.dark && !lite) {
+                    if (p.dark) {
                         this.shape = shape
                         shadowElevation = shadowRadius.toPx() * 0.35f
                         val shadowColor = Color.Black.copy(alpha = 0.5f)
@@ -374,6 +375,7 @@ fun GlassIconButton(
     size: Dp = 48.dp,
     prominent: Boolean = false,
     enabled: Boolean = true,
+    iconModifier: Modifier = Modifier,
 ) {
     val p = LocalGlass.current
     GlassSurface(
@@ -389,7 +391,7 @@ fun GlassIconButton(
         Icon(
             styled(icon),
             contentDescription,
-            Modifier.align(Alignment.Center).size(size * 0.45f),
+            Modifier.align(Alignment.Center).size(size * 0.45f).then(iconModifier),
             tint = if (prominent) p.onAccent else p.content,
         )
     }

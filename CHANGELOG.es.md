@@ -4,6 +4,24 @@
 
 [English](CHANGELOG.md) | **Español**
 
+## 0.4.0
+
+### Novedades
+- Teclado científico con la distribución de una Casio: la segunda función de cada tecla se usa
+  manteniéndola apretada. Nuevas: fracción, raíz n-ésima, 10ˣ y x³. Los números quedan como en
+  la básica; los paréntesis y el % no se repiten.
+- Escritura natural: exponentes arriba y más chicos, fracciones apiladas y raíces con barra.
+- Tocar la cuenta mueve el cursor para editarla en cualquier lugar; tocar lo vacío lo lleva al final.
+- Separador de miles: 27.000,3 (según el idioma).
+- Al borrar todo, la cuenta se va hacia arriba y se desvanece.
+
+### Cambios
+- Mantener apretado "borrar" borra todo en 0,4 s.
+- Las teclas responden en toda su superficie, también tocadas en el borde.
+- ( ) cierra el paréntesis abierto después de cualquier cosa que pueda cerrarlo, no solo de un número.
+- El cristal se dibuja igual que en Calendar, Contacts y Phone: refracción y desenfoque en todas
+  las superficies y el fondo animado sin pausas al tocar.
+
 ## 0.3.2
 
 ### Cambios

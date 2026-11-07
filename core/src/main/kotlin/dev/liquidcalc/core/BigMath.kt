@@ -156,6 +156,19 @@ internal object BigMath {
         return y.round(MC).movePointRight(k)
     }
 
+    /** Raíz n-ésima de x. Con n entero impar, también de negativos: ⁵√−32 = −2. */
+    fun root(n: BigDecimal, x: BigDecimal): BigDecimal {
+        if (n.signum() == 0) fail(CalcError.Domain)
+        if (n.compareTo(TWO) == 0) return sqrt(x)
+        if (n.compareTo(BigDecimal(3)) == 0) return cbrt(x)
+        val inverse = BigDecimal.ONE.divide(n, WORK)
+        if (x.signum() < 0) {
+            if (!isInteger(n) || !n.toBigIntegerExact().testBit(0)) fail(CalcError.Domain)
+            return pow(x.negate(), inverse).negate().round(MC)
+        }
+        return pow(x, inverse).round(MC)
+    }
+
     fun pow(base: BigDecimal, exponent: BigDecimal): BigDecimal {
         if (isInteger(exponent)) {
             val n = exponent.toBigIntegerExact()

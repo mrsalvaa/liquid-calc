@@ -19,8 +19,14 @@ history can be cleared or turned off in Settings.
 
 ## Features
 
-- **Basic and scientific**: sin, cos, tan and their inverses (degrees or radians), ln, log, eˣ,
-  powers, square and cube roots, factorial, absolute value, 1/x, π and e.
+- **Basic and scientific**: sin, cos, tan and their inverses (degrees or radians), ln, log, 10ˣ,
+  eˣ, fractions, powers, square, cube and n-th roots, factorial, absolute value, x⁻¹, π and e.
+  The scientific block follows a Casio layout: each key's second function (SHIFT on a Casio) is
+  shown small on top and used by holding the key.
+- **Natural display**: the screen shows the calculation like a scientific calculator: x³ with a
+  small raised exponent, stacked fractions, roots with the bar on top. Tap the calculation to
+  put the cursor there and fix it, even after "="; tap empty space to jump to the end.
+- Numbers use the language's thousands and decimal separators: 27,000.3 in English.
 - **Exact decimal arithmetic**: 0.1 + 0.2 gives 0.3. Everything is computed with 34 digits
   (decimal128) and 15 are shown, so rounding noise never appears.
 - **Own parser**: expressions are read by a parser written for the calculator; they're never run
@@ -32,9 +38,11 @@ history can be cleared or turned off in Settings.
 - Local **history**: tap a calculation to bring it back. Clear it all, or turn it off (which also
   clears it) in Settings.
 - Copy the result: long-press the number and tap "Copy".
-- Hold "delete" to clear everything.
+- Hold "delete" for 0.4 s to clear everything (even if released right after); the calculation
+  floats up and fades.
+  Keys respond across their whole area, edges included.
 - **Physical keyboard**: digits and `+ - * / ^ % ! ( )`; Enter or `=` calculates, Backspace
-  deletes, Esc or Delete clears. Letters: `s` sin, `c` cos, `t` tan, `l` ln, `g` log,
+  deletes, Esc or Delete clears, arrows move the cursor. Letters: `s` sin, `c` cos, `t` tan, `l` ln, `g` log,
   `r` √, `p` π, `e`, `a` ANS. Ctrl+C copies, Ctrl+V pastes, Ctrl+H opens the history and
   Ctrl+D switches degrees/radians.
 - Portrait and landscape: in landscape the scientific keys sit next to the basic ones.

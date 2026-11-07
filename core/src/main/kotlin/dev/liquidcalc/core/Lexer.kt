@@ -5,10 +5,10 @@ import java.math.BigDecimal
 
 internal enum class TokenKind {
     NUMBER, PLUS, MINUS, TIMES, DIVIDE, POWER, LPAREN, RPAREN, FACTORIAL, PERCENT,
-    SQRT, CBRT, FUNCTION, PI, E, ANS, END,
+    SQRT, CBRT, FUNCTION, PI, E, ANS, SEMICOLON, END,
 }
 
-internal enum class Function { SIN, COS, TAN, ASIN, ACOS, ATAN, LN, LOG, SQRT, CBRT, EXP, ABS }
+internal enum class Function { SIN, COS, TAN, ASIN, ACOS, ATAN, LN, LOG, SQRT, CBRT, EXP, ABS, ROOT }
 
 internal data class Token(
     val kind: TokenKind,
@@ -42,6 +42,7 @@ internal class Lexer(private val text: String) {
                         ')' -> TokenKind.RPAREN
                         '!' -> TokenKind.FACTORIAL
                         '%' -> TokenKind.PERCENT
+                        ';' -> TokenKind.SEMICOLON
                         '√' -> TokenKind.SQRT
                         '∛' -> TokenKind.CBRT
                         'π' -> TokenKind.PI
@@ -93,6 +94,7 @@ internal class Lexer(private val text: String) {
             "sin" to Function.SIN, "cos" to Function.COS, "tan" to Function.TAN,
             "asin" to Function.ASIN, "acos" to Function.ACOS, "atan" to Function.ATAN,
             "ln" to Function.LN, "log" to Function.LOG, "exp" to Function.EXP, "abs" to Function.ABS,
+            "root" to Function.ROOT,
         )
     }
 }

@@ -4,10 +4,10 @@ package dev.liquidcalc.ui.glass
 import android.os.SystemClock
 import android.provider.Settings
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,10 +21,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -33,27 +41,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import dev.liquidcalc.R
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.liquidcalc.R
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
-import kotlinx.coroutines.delay
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
 
 @Immutable
 data class GlassPalette(
@@ -262,16 +257,6 @@ val LocalTabActive = compositionLocalOf { true }
 /** true en la capa flotante (barra inferior, menús), que refracta también el contenido. */
 val LocalFloating = staticCompositionLocalOf { false }
 
-/**
- * true = las superficies se dibujan sin refracción ni desenfoque (el mismo dibujo que con fondo
- * liso: tinte, brillo y borde), también con el fondo en movimiento o dentro de lo que flota.
- * Para pantallas con muchas superficies a la vez (las teclas de una calculadora, las filas de un
- * panel que se desliza): con efectos, cada una se recalcula en cada cuadro en que cambia lo de
- * atrás. Detrás hay manchas de color muy suaves, así que la diferencia casi no se ve. En tema
- * oscuro tampoco llevan sombra de elevación (sobre un fondo casi negro no se nota).
- */
-val LocalLiteGlass = staticCompositionLocalOf { false }
-
 /** Lo que refractan las superficies de cristal: el fondo, o el fondo más el contenido. */
 val LocalBackdrop = staticCompositionLocalOf<Backdrop> { error("Falta GlassRoot") }
 
@@ -388,31 +373,9 @@ fun GlassRoot(
 ) {
     val background = rememberLayerBackdrop()
     val page = rememberLayerBackdrop()
-    // Mientras se toca la pantalla (y un momento después) el fondo no se anima: cada paso de la
-    // animación obliga a recomponer todo el cristal encima, y lo que se toca o se desliza tiene
-    // prioridad. El fondo se mueve tan despacio que la pausa no se nota.
-    var touching by remember { mutableStateOf(false) }
-    var lastTouch by remember { mutableLongStateOf(0L) }
-    LaunchedEffect(lastTouch) {
-        if (lastTouch == 0L) return@LaunchedEffect
-        delay(TOUCH_PAUSE_MS)
-        touching = false
-    }
-    Box(
-        Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        awaitPointerEvent(PointerEventPass.Initial)
-                        touching = true
-                        lastTouch = SystemClock.uptimeMillis()
-                    }
-                }
-            },
-    ) {
+    Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().layerBackdrop(page)) {
-            LiquidBackground(Modifier.fillMaxSize().layerBackdrop(background), animated, paused = touching)
+            LiquidBackground(Modifier.fillMaxSize().layerBackdrop(background), animated)
             CompositionLocalProvider(LocalBackdrop provides background) {
                 Box(Modifier.fillMaxSize(), content = content)
             }
@@ -431,11 +394,8 @@ fun GlassRoot(
     }
 }
 
-/** Cuánto sigue quieto el fondo animado después del último toque. */
-private const val TOUCH_PAUSE_MS = 1500L
-
 @Composable
-fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true, paused: Boolean = false) {
+fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true) {
     val p = LocalGlass.current
     val animated = animate && !LocalReducedMotion.current
     // Las manchas se mueven tan despacio (una vuelta cada 90 s) que basta con moverlas ~15 veces
@@ -443,9 +403,8 @@ fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true, pau
     // en cada fotograma (120 veces por segundo) aunque no se toque nada.
     var phase by remember { mutableFloatStateOf(0.8f) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    // En pausa las manchas se quedan donde están, con el mismo aspecto: solo dejan de moverse.
-    LaunchedEffect(animated, paused, lifecycle, p.blobs.isEmpty()) {
-        if (!animated || paused || p.blobs.isEmpty()) return@LaunchedEffect
+    LaunchedEffect(animated, lifecycle, p.blobs.isEmpty()) {
+        if (!animated || p.blobs.isEmpty()) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (true) {
                 phase = (SystemClock.uptimeMillis() % 90_000L) / 90_000f * (2 * PI).toFloat()
@@ -464,9 +423,7 @@ fun LiquidBackground(modifier: Modifier = Modifier, animate: Boolean = true, pau
         AccentGlowBackground(modifier)
         return
     }
-    // En su propia textura: las manchas solo se vuelven a pintar cuando se mueven (15 veces por
-    // segundo, o nunca si está quieto); cuando cambia otra cosa de la pantalla se reutiliza.
-    Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
+    Canvas(modifier) {
         drawRect(p.base)
         val w = size.width
         val h = size.height

@@ -33,8 +33,16 @@ object Session {
     var clears by mutableStateOf(0)
         private set
 
+    /** Lo que había antes de borrar todo, para la animación de salida. */
+    var cleared by mutableStateOf("")
+        private set
+
+    /** "Borrar": lo de antes del cursor. */
+    fun backspace() = edit { it.backspace() }
+
     /** Borrar todo (mantener "borrar" apretado). */
     fun clearAll() {
+        cleared = editor.expression
         edit { it.clear() }
         clears++
     }
@@ -51,17 +59,17 @@ object Session {
     fun preview(angle: AngleUnit): BigDecimal? {
         val e = editor
         if (e.evaluated || e.expression.isEmpty() || e.expression.all { it.isDigit() || it == e.separator }) return null
-        return (evaluate(e.expression, angle) as? CalcResult.Value)?.value
+        return (evaluate(e.engineText(), angle) as? CalcResult.Value)?.value
     }
 
     /** "=": guarda el resultado como ANS y en el historial (si está activado). */
     fun equals(angle: AngleUnit) {
         val e = editor
         if (e.expression.isEmpty() || e.evaluated) return
-        when (val r = evaluate(e.expression, angle)) {
+        when (val r = evaluate(e.engineText(), angle)) {
             is CalcResult.Value -> {
                 ans = r.value
-                editor = e.copy(evaluated = true)
+                editor = e.copy(evaluated = true, cursor = e.expression.length)
                 error = null
                 History.add(HistoryItem(e.expression, r.value.toPlainString(), System.currentTimeMillis()))
             }

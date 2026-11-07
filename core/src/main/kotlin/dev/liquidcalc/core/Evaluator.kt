@@ -20,6 +20,7 @@ internal class Evaluator(private val angle: AngleUnit, private val ans: BigDecim
             is Node.Percent -> eval(node.operand).divide(hundred)
             is Node.Factorial -> BigMath.factorial(eval(node.operand))
             is Node.Call -> call(node.function, eval(node.argument))
+            is Node.Root -> BigMath.root(eval(node.index), eval(node.radicand))
             is Node.Binary -> binary(node)
         },
     )
@@ -60,6 +61,7 @@ internal class Evaluator(private val angle: AngleUnit, private val ans: BigDecim
             Function.CBRT -> BigMath.cbrt(x)
             Function.EXP -> BigMath.exp(x)
             Function.ABS -> x.abs()
+            Function.ROOT -> error("root lleva dos argumentos")
         }
     }
 }

@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,7 +64,6 @@ import dev.liquidcalc.ui.glass.LocalToast
 import dev.liquidcalc.ui.glass.LocalGlass
 import dev.liquidcalc.ui.glass.LocalReducedMotion
 import java.math.BigDecimal
-import dev.liquidcalc.ui.glass.LocalLiteGlass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.graphicsLayer
 
@@ -148,8 +148,7 @@ private fun HistoryContent(enabled: Boolean, onClose: () -> Unit) {
         when {
             !enabled -> EmptyState(stringResource(R.string.history_off), stringResource(R.string.history_off_hint))
             items.isEmpty() -> EmptyState(stringResource(R.string.history_empty), stringResource(R.string.history_empty_hint))
-            // Las filas, livianas: refractar cada una mientras se desliza el panel es carísimo.
-            else -> CompositionLocalProvider(LocalLiteGlass provides true) {
+            else -> {
                 // En su propia capa: deslizar la lista no obliga a volver a desenfocar el panel.
                 LazyColumn(Modifier.graphicsLayer {}, contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp)) {
                     items(items, key = { it.time.toString() + it.expression }) { item ->
@@ -168,8 +167,8 @@ private fun HistoryContent(enabled: Boolean, onClose: () -> Unit) {
 private fun HistoryRow(item: HistoryItem, onClick: () -> Unit) {
     val p = LocalGlass.current
     val separator = Session.editor.separator
-    val result = pretty(Format.display(BigDecimal(item.value), separator))
-    val spoken = "${item.expression} = $result"
+    val result = pretty(Format.display(BigDecimal(item.value), separator), LocalGrouping.current)
+    val spoken = "${Editor.toEngine(item.expression)} = $result"
     GlassSurface(
         Modifier
             .fillMaxWidth()
@@ -184,18 +183,15 @@ private fun HistoryRow(item: HistoryItem, onClick: () -> Unit) {
         onClick = onClick,
     ) {
         Column(Modifier.padding(horizontal = 18.dp, vertical = 12.dp), horizontalAlignment = Alignment.End) {
-            Text(
+            FitMathText(
                 item.expression,
-                Modifier.fillMaxWidth(),
-                color = p.contentSecondary,
-                fontSize = 15.sp,
-                textAlign = TextAlign.End,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                TextStyle(color = p.contentSecondary),
+                maxSize = 16.sp,
+                minSize = 11.sp,
             )
             Row {
                 Spacer(Modifier.width(8.dp))
-                Text("= $result", fontSize = 22.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("= $result", color = p.content, fontSize = 22.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

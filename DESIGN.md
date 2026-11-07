@@ -77,14 +77,16 @@ La pantalla redibuja todo en cada cuadro, y con el fondo en movimiento cada supe
 refracta y desenfoca lo que tiene atrás. Con pocas superficies (Calendar) no se nota; con muchas a
 la vez (el teclado de Calc, 45 teclas) no llega a 120 Hz. Por eso:
 
-- **`LocalLiteGlass`**: en pantallas con muchas superficies, la app las pide livianas (el mismo
-  dibujo que con fondo liso: tinte, brillo y borde; en oscuro, sin sombra). Calc lo usa en todo
-  el contenido; lo que flota encima (el panel del historial) sigue refractando de verdad.
-- **Filas de un panel que se desliza**: livianas y la lista en su propia capa
-  (`Modifier.graphicsLayer {}`), así deslizar no obliga a volver a desenfocar el panel.
-- **Fondo animado**: `GlassRoot` lo pausa mientras se toca la pantalla y la app lo pausa cuando
-  lo tapa un panel (en Calc, con el historial abierto). Está en su propia textura: solo se
-  repinta cuando se mueve.
+- **`ui/glass` igual a Calendar**: `Components.kt` y `Theme.kt` son copia de Calendar (la
+  referencia) sin cambios: las superficies del contenido van sin efectos solo con fondo liso o
+  de énfasis; "En movimiento" refracta y desenfoca en todas. Calc ya no usa superficies
+  livianas ni pausa el fondo al tocar. Único agregado: el parámetro opcional
+  `interactionSource` de `GlassSurface`, para que las teclas tomen el toque en toda la celda y
+  la superficie igual se deforme al apretar.
+- **Lista de un panel que se desliza**: en su propia capa (`Modifier.graphicsLayer {}`), así
+  deslizar no obliga a volver a desenfocar el panel.
+- **Fondo animado**: la app lo pausa cuando lo tapa un panel (en Calc, con el historial
+  abierto).
 - **Medir con la build `profile`** (optimizada como la release, instalable como `.debug`): la
   debug de Compose va lenta por sí sola. `adb shell dumpsys gfxinfo <paquete> framestats` dice
   si el tiempo se va en el hilo de la interfaz, en el de dibujo o en la GPU.
